@@ -72,5 +72,33 @@ void main() {
               .saveBudgetPeriod(any(that: isA<BudgetPeriod>()))).called(1);
           verifyNoMoreInteractions(budgetRepository);
         });
+
+
+    blocTest('Add a budget period with bloc test - should fail',
+        build: () => BudgetManagerBloc(budgetRepository),
+        setUp: () {
+          when(() => budgetRepository
+                  .saveBudgetPeriod(any(that: isA<BudgetPeriod>())))
+              .thenAnswer((_) => Future.value());
+        },
+        act: (bloc) {
+          final expectedStart = DateTime.parse("2022-01-01");
+          final expectedEnd = DateTime.parse("2022-01-31");
+
+          return bloc
+              .add(AddBudgetPeriod(start: expectedStart, end: expectedEnd));
+        },
+        expect: () => [
+              DetailedBudget(
+                  period: BudgetPeriod(
+                      start: DateTime.parse("2022-01-01"),
+                      end: DateTime.parse("2023-01-31")))
+            ],
+        verify: (bloc) {
+          verify(() => budgetRepository
+              .saveBudgetPeriod(any(that: isA<BudgetPeriod>()))).called(1);
+          verifyNoMoreInteractions(budgetRepository);
+        });
+
   });
 }
