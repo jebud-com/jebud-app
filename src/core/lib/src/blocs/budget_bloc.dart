@@ -1,6 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:core/src/entities/budget_period.dart';
 import 'package:core/src/repository/budget_repository.dart';
+import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
+
+import '../entities/period_income.dart';
 
 class BudgetManagerBlocState {}
 
@@ -12,6 +16,7 @@ class BudgetManagerBloc
 
   BudgetManagerBloc(this._budgetRepository) : super(UninitializedBudget()) {
     on<AddBudgetPeriod>(_addAddBudgetPeriod);
+    on<AddPeriodIncome>(_addPeriodIncome);
   }
 
   void _addAddBudgetPeriod(AddBudgetPeriod event, Emitter emit) async {
@@ -19,21 +24,38 @@ class BudgetManagerBloc
     await _budgetRepository.saveBudgetPeriod(period);
     emit(DetailedBudget(period: period));
   }
+
+  void _addPeriodIncome(AddPeriodIncome event, Emitter emit) async {
+    final income = PeriodIncome(amount: event.amount);
+    final currentDetailedBudtet = (state as DetailedBudget);
+    final newBudgetDetails = currentDetailedBudtet.copyWith(incomes: [...currentDetailedBudtet.incomes, income]);
+    await _budgetRepository.addPeriodIncome(income);
+    emit(newBudgetDetails);
+    }
 }
 
 class UninitializedBudget extends BudgetManagerBlocState {}
 
-class DetailedBudget extends BudgetManagerBlocState {
+class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   final BudgetPeriod period;
-  DetailedBudget({required this.period});
+  late final List<PeriodIncome> incomes;
+    DetailedBudget({required this.period, List<PeriodIncome>? incomes}) {
+      this.incomes = incomes ?? [];
+    }
+
+  DetailedBudget copyWith({
+    BudgetPeriod? period,
+    List<PeriodIncome>? incomes
+  }) => DetailedBudget(
+    period: period ?? this.period,
+    incomes: incomes ?? this.incomes
+  );
 
   @override
-  bool operator ==(Object? other) =>
-      identical(this, other) ||
-      other is DetailedBudget && other.period == period;
+  List<Object?> get props => [
+    period, incomes
+  ] ;
 
-  @override
-  int get hashCode => period.hashCode;
 }
 
 class AddBudgetPeriod extends BudgetManagerBlocEvent {
@@ -41,3 +63,10 @@ class AddBudgetPeriod extends BudgetManagerBlocEvent {
   final DateTime end;
   AddBudgetPeriod({required this.start, required this.end});
 }
+
+
+class AddPeriodIncome extends BudgetManagerBlocEvent {
+  final double amount;
+  AddPeriodIncome({ required this.amount});
+}
+
