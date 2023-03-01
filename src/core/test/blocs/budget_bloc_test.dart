@@ -32,31 +32,8 @@ void main() {
       expect(budgetBloc.state, isA<UninitializedBudget>());
     });
 
-    test('Add a budget period', () async {
-      final expectedStart = DateTime.parse("2022-01-01");
-      final expectedEnd = DateTime.parse("2022-01-31");
-
-      when(() =>
-              budgetRepository.saveBudgetPeriod(any(that: isA<BudgetPeriod>())))
-          .thenAnswer((_) => Future.value());
-
-      budgetBloc.add(AddBudgetPeriod(start: expectedStart, end: expectedEnd));
-
-      await Future.delayed(Duration.zero);
-
-      expect(budgetBloc.state, isA<DetailedBudget>());
-      var detailedBudget = (budgetBloc.state as DetailedBudget);
-      expect(detailedBudget.period.start, equals(expectedStart));
-      expect(detailedBudget.period.end, equals(expectedEnd));
-      verify(() =>
-              budgetRepository.saveBudgetPeriod(any(that: isA<BudgetPeriod>())))
-          .called(1);
-      verifyNoMoreInteractions(budgetRepository);
-    });
-
     final expectedStart = DateTime.parse("2022-01-01");
     final expectedEnd = DateTime.parse("2022-01-31");
-
     blocTest('Add a budget period with bloc test',
         build: () => BudgetManagerBloc(budgetRepository),
         setUp: () {
@@ -67,6 +44,7 @@ void main() {
         act: (bloc) =>
             bloc.add(AddBudgetPeriod(start: expectedStart, end: expectedEnd)),
         expect: () => [
+              isA<InitializingBudget>(),
               DetailedBudget(
                   period: BudgetPeriod(start: expectedStart, end: expectedEnd))
             ],
@@ -88,8 +66,11 @@ void main() {
         seed: () => DetailedBudget(period: existingBudgetPeriod),
         expect: () => [
               DetailedBudget(
+                  period: existingBudgetPeriod, isAddingIncome: true),
+              DetailedBudget(
                   period: existingBudgetPeriod,
-                  incomes: [PeriodIncome(amount: 2400)])
+                  incomes: [PeriodIncome(amount: 2400)],
+                  isAddingIncome: false)
             ],
         verify: (_) {
           verify(() =>
@@ -113,7 +94,12 @@ void main() {
         expect: () => [
               DetailedBudget(
                   period: existingBudgetPeriod,
-                  incomes: [exitingPeriodIncome, expectedPeriodIncome])
+                  incomes: [exitingPeriodIncome],
+                  isAddingIncome: true),
+              DetailedBudget(
+                  period: existingBudgetPeriod,
+                  incomes: [exitingPeriodIncome, expectedPeriodIncome],
+                  isAddingIncome: false)
             ],
         verify: (_) {
           verify(() =>
