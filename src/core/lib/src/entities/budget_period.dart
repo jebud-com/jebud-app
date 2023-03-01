@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class BudgetPeriod extends Equatable{
+class BudgetPeriod extends Equatable {
   final DateTime start;
   final DateTime end;
 

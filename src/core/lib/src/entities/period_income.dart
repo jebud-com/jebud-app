@@ -1,6 +1,3 @@
-
-
-
 import 'package:equatable/equatable.dart';
 
 class PeriodIncome extends Equatable {
