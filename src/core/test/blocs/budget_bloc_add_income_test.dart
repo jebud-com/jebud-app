@@ -15,16 +15,15 @@ void main() {
   late MockBudgetRepository budgetRepository;
   MockDateTimeService dateTimeService = MockDateTimeService();
 
-
   final PeriodIncome existingPeriodIncome = PeriodIncome(amount: 2400);
   final BudgetDetails existingBudgetDetails =
-    BudgetDetails(startingAmount: 500, startingMonth: DateTime.now());
+      BudgetDetails(startingAmount: 500, startingMonth: DateTime.now());
 
   group('BudgetBloc tests', () {
     setUp(() {
       registerFallbackValue(PeriodIncome(amount: 0));
       budgetRepository = MockBudgetRepository();
-      budgetBloc = BudgetManagerBloc(budgetRepository,dateTimeService);
+      budgetBloc = BudgetManagerBloc(budgetRepository, dateTimeService);
     });
 
     test('Initial state - Unintialized', () {
@@ -47,7 +46,7 @@ void main() {
                   incomes: [],
                   isAddingIncome: true),
               DetailedBudget(
-                  budgetDetails: existingBudgetDetails ,
+                  budgetDetails: existingBudgetDetails,
                   incomes: [PeriodIncome(amount: 2400)],
                   isAddingIncome: false)
             ],
@@ -63,8 +62,8 @@ void main() {
         'Add second budget period income',
         build: () => BudgetManagerBloc(budgetRepository, dateTimeService),
         seed: () => DetailedBudget(
-                  budgetDetails: existingBudgetDetails ,
-                  incomes: [existingPeriodIncome]),
+            budgetDetails: existingBudgetDetails,
+            incomes: [existingPeriodIncome]),
         setUp: () {
           when(() => budgetRepository
                   .addPeriodIncome(any(that: isA<PeriodIncome>())))

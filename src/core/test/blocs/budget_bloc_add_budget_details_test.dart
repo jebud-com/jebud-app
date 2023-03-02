@@ -8,39 +8,35 @@ import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'fakes/mock_budget_repository.dart';
 
+class MockDateTimeService extends Mock implements DateTimeService {}
 
-class MockDateTimeService extends Mock implements DateTimeService{}
-
-void main() { 
-
-  MockBudgetRepository budgetRepository = MockBudgetRepository(); 
+void main() {
+  MockBudgetRepository budgetRepository = MockBudgetRepository();
   MockDateTimeService dateTimeService = MockDateTimeService();
 
-  setUpAll(() => registerFallbackValue(BudgetDetails(startingMonth: DateTime.now(), startingAmount: 0)));
+  setUpAll(() => registerFallbackValue(
+      BudgetDetails(startingMonth: DateTime.now(), startingAmount: 0)));
 
   DateTime expectedStartingMonth = DateTime.parse("2023-03-01");
-  blocTest('When Adding budget details', 
-      setUp: (){ 
-        when(() => dateTimeService.startOfCurrentMonth).
-          thenReturn(expectedStartingMonth);
-        when(() => budgetRepository.saveBudgetDetails(any(that: isA<BudgetDetails>())))
-          .thenAnswer((_) => Future.value());
+  blocTest('When Adding budget details',
+      setUp: () {
+        when(() => dateTimeService.startOfCurrentMonth)
+            .thenReturn(expectedStartingMonth);
+        when(() => budgetRepository.saveBudgetDetails(
+            any(that: isA<BudgetDetails>()))).thenAnswer((_) => Future.value());
       },
-      build : () => BudgetManagerBloc(budgetRepository, dateTimeService),
+      build: () => BudgetManagerBloc(budgetRepository, dateTimeService),
       act: (bloc) => bloc.add(SetupBudgetDetails(startingAmount: 400)),
       expect: () => [
-      isA<InitializingBudget>(), 
-      DetailedBudget(
-        budgetDetails: BudgetDetails(
-          startingAmount: 400,
-          startingMonth: expectedStartingMonth))],
+            isA<InitializingBudget>(),
+            DetailedBudget(
+                budgetDetails: BudgetDetails(
+                    startingAmount: 400, startingMonth: expectedStartingMonth))
+          ],
       verify: (_) {
-      verify(() => budgetRepository.saveBudgetDetails(
-            BudgetDetails(
-              startingAmount: 400,
-              startingMonth: expectedStartingMonth))).called(1);
-      verifyNoMoreInteractions(budgetRepository);
-      }
-      );
-
+        verify(() => budgetRepository.saveBudgetDetails(BudgetDetails(
+            startingAmount: 400,
+            startingMonth: expectedStartingMonth))).called(1);
+        verifyNoMoreInteractions(budgetRepository);
+      });
 }

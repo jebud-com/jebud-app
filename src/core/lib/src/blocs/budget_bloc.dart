@@ -15,24 +15,23 @@ class BudgetManagerBloc
   final BudgetRepository _budgetRepository;
   final DateTimeService _dateTimeService;
 
-  BudgetManagerBloc(this._budgetRepository, this._dateTimeService) : super(UninitializedBudget()) {
+  BudgetManagerBloc(this._budgetRepository, this._dateTimeService)
+      : super(UninitializedBudget()) {
     on<SetupBudgetDetails>(_setupBudgetDetails);
     on<AddPeriodIncome>(_addPeriodIncome);
   }
 
-
   void _setupBudgetDetails(SetupBudgetDetails event, Emitter emit) async {
     emit(InitializingBudget());
     var details = BudgetDetails(
-      startingAmount : event.startingAmount,
-      startingMonth: _dateTimeService.startOfCurrentMonth);
+        startingAmount: event.startingAmount,
+        startingMonth: _dateTimeService.startOfCurrentMonth);
     await _budgetRepository.saveBudgetDetails(details);
     emit(DetailedBudget(budgetDetails: details));
   }
 
-
   void _addPeriodIncome(AddPeriodIncome event, Emitter emit) async {
-      emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
         isAddingIncome: true));
 
     final income = PeriodIncome(amount: event.amount);
@@ -40,30 +39,28 @@ class BudgetManagerBloc
 
     final currentDetailedBudtet = (state as DetailedBudget);
     emit(DetailedBudget.copyFromWith(state as DetailedBudget,
-          isAddingIncome: false,
-          incomes: [...currentDetailedBudtet.incomes, income]));
+        isAddingIncome: false,
+        incomes: [...currentDetailedBudtet.incomes, income]));
   }
-    }
+}
 
 class UninitializedBudget extends BudgetManagerBlocState {}
 
 class InitializingBudget extends BudgetManagerBlocState {}
 
 class DetailedBudget extends Equatable implements BudgetManagerBlocState {
-  final BudgetDetails budgetDetails; 
+  final BudgetDetails budgetDetails;
   late final List<PeriodIncome> incomes;
   late final bool isAddingIncome;
   DetailedBudget(
-      {
-      required this.budgetDetails,
+      {required this.budgetDetails,
       List<PeriodIncome>? incomes,
       this.isAddingIncome = false}) {
     this.incomes = incomes ?? [];
   }
 
   factory DetailedBudget.copyFromWith(DetailedBudget oldDetailedBudget,
-          {List<PeriodIncome>? incomes,
-          bool? isAddingIncome}) =>
+          {List<PeriodIncome>? incomes, bool? isAddingIncome}) =>
       DetailedBudget(
           budgetDetails: oldDetailedBudget.budgetDetails,
           incomes: incomes ?? oldDetailedBudget.incomes,
@@ -74,7 +71,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
 }
 
 class SetupBudgetDetails extends BudgetManagerBlocEvent {
-  final double startingAmount; 
+  final double startingAmount;
   SetupBudgetDetails({required this.startingAmount});
 }
 
@@ -82,6 +79,3 @@ class AddPeriodIncome extends BudgetManagerBlocEvent {
   final double amount;
   AddPeriodIncome({required this.amount});
 }
-
-
-
