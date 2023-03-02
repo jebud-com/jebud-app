@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:collection/collection.dart';
 import 'package:core/src/entities/budget_details.dart';
 import 'package:core/src/interfaces/date_time_service.dart';
 import 'package:core/src/repository/budget_repository.dart';
@@ -72,7 +71,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
 
   double estimateSavingsUpTo(DateTime targetMonth) =>
       budgetDetails.startingAmount +
-      (incomes.firstOrNull?.amount ?? .0) *
+      (incomes.fold(0.0, (value, element) => value + element.amount)) *
           _numberOfMonthsToTargetMonth(targetMonth);
 
   int _numberOfMonthsToTargetMonth(DateTime targetMonth) {
