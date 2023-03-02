@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:collection/collection.dart';
 import 'package:core/src/entities/budget_details.dart';
 import 'package:core/src/interfaces/date_time_service.dart';
 import 'package:core/src/repository/budget_repository.dart';
@@ -68,6 +69,23 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
 
   @override
   List<Object?> get props => [budgetDetails, incomes, isAddingIncome];
+
+  double estimateSavingsUpTo(DateTime targetMonth) =>
+      budgetDetails.startingAmount +
+      (incomes.firstOrNull?.amount ?? .0) *
+          _numberOfMonthsToTargetMonth(targetMonth);
+
+  int _numberOfMonthsToTargetMonth(DateTime targetMonth) {
+    final startingMonth = budgetDetails.startingMonth;
+    final firstDayOfTargetMonth =
+        DateTime(targetMonth.year, targetMonth.month, 1);
+
+    final yearDifference = firstDayOfTargetMonth.year - startingMonth.year;
+
+    return (firstDayOfTargetMonth.month - startingMonth.month) +
+        12 * yearDifference +
+        1;
+  }
 }
 
 class SetupBudgetDetails extends BudgetManagerBlocEvent {

@@ -3,12 +3,10 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:core/src/blocs/budget_bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
-import 'package:core/src/interfaces/date_time_service.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'fakes/mock_budget_repository.dart';
-
-class MockDateTimeService extends Mock implements DateTimeService {}
+import 'fakes/mock_datetime_service.dart';
 
 void main() {
   MockBudgetRepository budgetRepository = MockBudgetRepository();
