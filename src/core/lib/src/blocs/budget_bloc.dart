@@ -1,11 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
+import 'package:core/src/entities/period_expense.dart';
 import 'package:core/src/interfaces/date_time_service.dart';
 import 'package:core/src/repository/budget_repository.dart';
 import 'package:equatable/equatable.dart';
 
 import '../entities/period_income.dart';
-
 class BudgetManagerBlocState {}
 
 class BudgetManagerBlocEvent {}
@@ -51,12 +51,15 @@ class InitializingBudget extends BudgetManagerBlocState {}
 class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   final BudgetDetails budgetDetails;
   late final List<PeriodIncome> incomes;
+  late final List<PeriodExpense> expenses;
   late final bool isAddingIncome;
   DetailedBudget(
       {required this.budgetDetails,
-      List<PeriodIncome>? incomes,
+      List<PeriodIncome>? incomes
+      , List<PeriodExpense>? expenses,
       this.isAddingIncome = false}) {
     this.incomes = incomes ?? [];
+    this.expenses = expenses ?? [];
   }
 
   factory DetailedBudget.copyFromWith(DetailedBudget oldDetailedBudget,
@@ -69,10 +72,29 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   @override
   List<Object?> get props => [budgetDetails, incomes, isAddingIncome];
 
-  double estimateSavingsUpTo(DateTime targetMonth) =>
-      budgetDetails.startingAmount +
-      (incomes.fold(0.0, (value, element) => value + element.amount)) *
-          _numberOfMonthsToTargetMonth(targetMonth);
+  double estimateSavingsUpTo(DateTime targetMonth) { 
+      
+      if(budgetDetails.startingMonth.millisecondsSinceEpoch - targetMonth.millisecondsSinceEpoch > 0) return 0;
+
+
+      double result = budgetDetails.startingAmount;
+      var startMonth = budgetDetails.startingMonth;
+
+      for(int i = 0; i < _numberOfMonthsToTargetMonth(targetMonth); i++)
+      { 
+        var currentMonth = DateTime(startMonth.year, startMonth.month + i, startMonth.day);
+        result = result + incomes.fold(0.0, (value, element) => value + element.amount);
+        result = result - expenses.fold(0.0, 
+            (value, element) =>
+                value + 
+                (
+                  
+                (element.applyUntil.millisecondsSinceEpoch - currentMonth.millisecondsSinceEpoch >= 0 && 
+                 element.startingFrom.millisecondsSinceEpoch - currentMonth.millisecondsSinceEpoch <= 0) ? element.amount : 0));
+      }
+
+      return result;
+  }
 
   int _numberOfMonthsToTargetMonth(DateTime targetMonth) {
     final startingMonth = budgetDetails.startingMonth;

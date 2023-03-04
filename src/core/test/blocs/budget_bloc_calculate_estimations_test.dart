@@ -1,9 +1,19 @@
 import 'package:core/src/blocs/budget_bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
+import 'package:core/src/entities/period_expense.dart';
 import 'package:core/src/entities/period_income.dart';
 import 'package:test/test.dart';
 
 void main() {
+
+
+  test('Calculate estimate for month before start budgeting', () {
+    final detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: 500, startingMonth: DateTime.parse("2023-03-01")));
+    expect(detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-02-01")), equals(0));
+    });
+
   test('Calculate estimation for any month without income', () {
     final detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
@@ -12,47 +22,135 @@ void main() {
   });
 
   test('Cacluate estimation with one income', () {
-    var startingMonth = DateTime.parse("2023-03-01");
-    calculateEstimationForMonthsAndForIncomes(500, startingMonth, startingMonth,
-        [PeriodIncome(amount: 399)], 500 + 399);
-  });
+      var startingMonth = DateTime.parse("2023-03-01");
+      calculateEstimationForMonthsAndForIncomes(
+          startingAmount: 500,
+          startingMonth: startingMonth,
+          targetMonth: startingMonth,
+          incomes : [PeriodIncome(amount: 399)],
+          expected:  500 + 399);
+      });
 
   test('Cacluate estimation with one income after 3 months', () {
-    var startingMonth = DateTime.parse("2023-03-01");
-    var threeMonthsLater = DateTime.parse("2023-05-01");
-    calculateEstimationForMonthsAndForIncomes(500, startingMonth,
-        threeMonthsLater, [PeriodIncome(amount: 399)], 500 + 399 + 399 + 399);
-  });
+      var startingMonth = DateTime.parse("2023-03-01");
+      var threeMonthsLater = DateTime.parse("2023-05-01");
+      calculateEstimationForMonthsAndForIncomes(
+          startingAmount: 500,
+          startingMonth : startingMonth,
+          targetMonth : threeMonthsLater,
+          incomes: [PeriodIncome(amount: 399)], 
+          expected: 500 + 399 + 399 + 399);
+      });
 
   test('Cacluate estimation with one income after 16 months', () {
-    var startingMonth = DateTime.parse("2023-03-01");
-    var sixteenMonthsLater = DateTime.parse("2024-06-01");
-    calculateEstimationForMonthsAndForIncomes(500, startingMonth,
-        sixteenMonthsLater, [PeriodIncome(amount: 399)], 500 + 399 * 16);
-  });
+      var startingMonth = DateTime.parse("2023-03-01");
+      var sixteenMonthsLater = DateTime.parse("2024-06-01");
+      calculateEstimationForMonthsAndForIncomes(
+          startingAmount: 500, 
+          startingMonth: startingMonth,
+          targetMonth: sixteenMonthsLater,
+          incomes: [PeriodIncome(amount: 399)],
+          expected: 500 + 399 * 16);
+      });
 
-  test('Calculte estimation wich many incomes after 3 months', () {
+  test('Calculte estimation with many incomes after 3 months', () {
     var startingMonth = DateTime.parse("2023-03-01");
     var threeMonthsLater = DateTime.parse("2023-05-01");
     calculateEstimationForMonthsAndForIncomes(
-        500,
-        startingMonth,
-        threeMonthsLater,
-        [PeriodIncome(amount: 399), PeriodIncome(amount: 200)],
-        500 + 399 * 3 + 200 * 3);
+        startingAmount: 500,
+        startingMonth : startingMonth,
+        targetMonth: threeMonthsLater,
+        incomes: [PeriodIncome(amount: 399), PeriodIncome(amount: 200)],
+        expected: 500 + 399 * 3 + 200 * 3);
   });
+
+  
+  test('Calculate estimation with single income for 1 month and single monthly interminable expense', () {
+      var startingMonth = DateTime.parse("2023-03-01");
+      calculateEstimationForMonthsAndForIncomes(
+          startingAmount: 400,
+          startingMonth: startingMonth,
+          targetMonth: startingMonth,
+          incomes : [
+          PeriodIncome(amount: 399)
+          ],
+          expenses : [
+          PeriodExpense(amount: 200, startingFrom: startingMonth)
+          ], 
+          expected : 400 + 399 - 200
+          );
+      });
+
+
+
+  test('Calculate estimation with single income for 3 month and single monthly interminable expense', () {
+      var startingMonth = DateTime.parse("2023-03-01");
+      var threeMonthsLater = DateTime.parse("2023-05-01");
+      calculateEstimationForMonthsAndForIncomes(
+          startingAmount: 400,
+          startingMonth: startingMonth,
+          targetMonth: threeMonthsLater,
+          incomes : [
+            PeriodIncome(amount: 399)
+          ],
+          expenses : [
+            PeriodExpense(amount: 200, startingFrom: startingMonth)
+          ], 
+          expected : 400 + 399 + 399 + 399 - 200 - 200 - 200
+          );
+      });
+
+
+  test('Calculate estimation with single income for 3 month and single monthly interminable expense but starts 2nd month', () {
+      var startingMonth = DateTime.parse("2023-03-01");
+      var oneMonthLater = DateTime.parse("2023-04-01");
+      var threeMonthsLater = DateTime.parse("2023-05-01");
+      calculateEstimationForMonthsAndForIncomes(
+          startingAmount: 400,
+          startingMonth: startingMonth,
+          targetMonth: threeMonthsLater,
+          incomes : [
+            PeriodIncome(amount: 399),
+          ],
+          expenses : [
+            PeriodExpense(amount: 200, startingFrom: startingMonth),  PeriodExpense(amount: 60, startingFrom: oneMonthLater)
+          ], 
+          expected : 400 + 399 + 399 + 399 - 200 - 200 - 200 - 60 - 60
+          );
+      });
+
+  test('Calculate estimation with single income for 3 month and single monthly interminable expense and one terminable after a month', () {
+      var startingMonth = DateTime.parse("2023-03-01");
+      var twoMonthsLater = DateTime.parse("2023-04-01");
+      var threeMonthsLater = DateTime.parse("2023-05-01");
+      calculateEstimationForMonthsAndForIncomes(
+          startingAmount: 400,
+          startingMonth: startingMonth,
+          targetMonth: threeMonthsLater,
+          incomes : [
+            PeriodIncome(amount: 399)
+          ],
+          expenses : [
+            PeriodExpense(amount: 200, startingFrom: startingMonth), PeriodExpense(amount: 50, startingFrom: startingMonth, applyUntil: twoMonthsLater)
+          ], 
+          expected : 400 + 399 + 399 + 399 - 200 - 200 - 200 - 50 - 50
+          );
+      });
+
 }
 
 void calculateEstimationForMonthsAndForIncomes(
-    double startingAmount,
-    DateTime startingMonth,
-    DateTime targetMonth,
-    List<PeriodIncome> incomes,
-    double expected) {
+    {required double startingAmount,
+    required DateTime startingMonth,
+    required DateTime targetMonth,
+    required List<PeriodIncome> incomes,
+    required double expected,
+    List<PeriodExpense>? expenses}
+    ) {
   final detailedBudget = DetailedBudget(
       budgetDetails: BudgetDetails(
           startingAmount: startingAmount, startingMonth: startingMonth),
-      incomes: incomes);
+      incomes: incomes, expenses: expenses);
 
   var result = detailedBudget.estimateSavingsUpTo(targetMonth);
 
