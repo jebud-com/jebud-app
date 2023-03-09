@@ -244,6 +244,45 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
       DailyExpense(description: description, amount: amount, day: day)
     ]);
   }
+
+  double getLeftDailyExpenseForRunningDay(DateTime today) {
+    return double.parse((((dailyExpenseAllocation.amount -
+                    _dailyExpenses
+                        .where((element) =>
+                            element.day.month == today.month &&
+                            element.day.year == today.year &&
+                            element.day.day < today.day)
+                        .fold(
+                            0.0, (value, element) => value + element.amount)) /
+                (DateTime(today.year, today.month + 1, 0).day -
+                    today.day +
+                    1)) -
+            _dailyExpenses
+                .where((element) =>
+                    element.day.day == today.day &&
+                    element.day.month == today.month &&
+                    element.day.year == today.year)
+                .fold(0.0,
+                    (previousValue, element) => previousValue + element.amount))
+        .toStringAsFixed(2));
+  }
+
+  double getLeftDailyExpenseForRunningWeek(DateTime today) {
+    var lastDayOfMonth = DateTime(today.year, today.month + 1, 0);
+    var diffInDaysToEndOfMonth = lastDayOfMonth.difference(today).inDays + 1;
+    var daysToSunday = (DateTime.sunday - today.weekday + 1);
+    return getLeftDailyExpenseForRunningDay(today) *
+        min(daysToSunday, diffInDaysToEndOfMonth);
+  }
+
+  double getLeftDailyExpenseForRunningMonth(DateTime today) {
+    return dailyExpenseAllocation.amount -
+        _dailyExpenses
+            .where((element) =>
+                element.day.month == today.month &&
+                element.day.year == today.year)
+            .fold(0.0, (value, element) => value + element.amount);
+  }
 }
 
 class SetupBudgetDetails extends BudgetManagerBlocEvent {
