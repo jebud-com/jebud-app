@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
+import 'package:core/src/entities/daily_expense_period_allocation.dart';
 import 'package:core/src/entities/period_expense.dart';
 import 'package:core/src/interfaces/date_time_service.dart';
 import 'package:core/src/repository/budget_repository.dart';
 import 'package:equatable/equatable.dart';
 
+import '../entities/daily_expense.dart';
 import '../entities/period_income.dart';
 import '../projections.dart';
 
@@ -75,7 +77,9 @@ class InitializingBudget extends BudgetManagerBlocState {}
 class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   final BudgetDetails budgetDetails;
   late final List<PeriodIncome> incomes;
+  late final List<DailyExpense> _dailyExpenses;
   late final List<PeriodExpense> expenses;
+  late final DailyExpensePeriodAllocation dailyExpenseAllocation;
   final bool isAddingIncome;
   final bool isAddingExpense;
 
@@ -84,20 +88,38 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
       List<PeriodIncome>? incomes,
       List<PeriodExpense>? expenses,
       this.isAddingIncome = false,
-      this.isAddingExpense = false}) {
+      this.isAddingExpense = false,
+      DailyExpensePeriodAllocation? dailyExpenseAllocation}) {
     this.incomes = incomes ?? [];
     this.expenses = expenses ?? [];
+    _dailyExpenses = [];
+    this.dailyExpenseAllocation =
+        dailyExpenseAllocation ?? DailyExpensePeriodAllocation.zero();
+  }
+
+  DetailedBudget._internal(
+      {required this.budgetDetails,
+      required this.incomes,
+      required this.expenses,
+      required List<DailyExpense> dailyExpenses,
+      required this.isAddingIncome,
+      required this.isAddingExpense,
+      required this.dailyExpenseAllocation}) {
+    _dailyExpenses = dailyExpenses;
   }
 
   factory DetailedBudget.copyFromWith(DetailedBudget oldDetailedBudget,
           {List<PeriodIncome>? incomes,
           List<PeriodExpense>? expenses,
           bool? isAddingExpense,
+          List<DailyExpense>? dailyExpenses,
           bool? isAddingIncome}) =>
-      DetailedBudget(
+      DetailedBudget._internal(
           budgetDetails: oldDetailedBudget.budgetDetails,
           incomes: incomes ?? oldDetailedBudget.incomes,
           expenses: expenses ?? oldDetailedBudget.expenses,
+          dailyExpenseAllocation: oldDetailedBudget.dailyExpenseAllocation,
+          dailyExpenses: dailyExpenses ?? oldDetailedBudget._dailyExpenses,
           isAddingExpense: isAddingExpense ?? oldDetailedBudget.isAddingExpense,
           isAddingIncome: isAddingIncome ?? oldDetailedBudget.isAddingIncome);
 
@@ -133,7 +155,19 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
                       : 0));
     }
 
-    return result;
+    return result -
+        max(
+            dailyExpenseAllocation.amount,
+            _dailyExpenses
+                .where((element) =>
+                    element.day.month == targetMonth.month &&
+                    element.day.year == targetMonth.year)
+                .fold(0, (value, element) => value + element.amount)) -
+        _dailyExpenses
+            .where((element) =>
+                element.day.month < targetMonth.month &&
+                element.day.year <= targetMonth.year)
+            .fold(0, (value, element) => value + element.amount);
   }
 
   int _numberOfMonthsToTargetMonth(DateTime targetMonth) {
@@ -187,7 +221,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
             .copyWith(month: budgetDetails.startingMonth.month + 11);
         break;
     }
-    
+
     var numberOfMonthsApplicable = _numberOfMonthsBetweenInclusiveEnds(
             startingFrom,
             DateTime.fromMillisecondsSinceEpoch(min(
@@ -199,6 +233,16 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
     var balance = estimateSavingsUpTo(targetMonth);
 
     return balance - amount * numberOfMonthsApplicable;
+  }
+
+  DetailedBudget addDailyExpense(
+      {required double amount,
+      required DateTime day,
+      required String description}) {
+    return DetailedBudget.copyFromWith(this, dailyExpenses: [
+      ..._dailyExpenses,
+      DailyExpense(description: description, amount: amount, day: day)
+    ]);
   }
 }
 

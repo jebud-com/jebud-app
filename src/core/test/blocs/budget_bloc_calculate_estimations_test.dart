@@ -1,8 +1,8 @@
 import 'package:core/src/blocs/budget_bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
+import 'package:core/src/entities/daily_expense_period_allocation.dart';
 import 'package:core/src/entities/period_expense.dart';
 import 'package:core/src/entities/period_income.dart';
-import 'package:core/src/projections.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -132,76 +132,155 @@ void main() {
         expected: 400 + 399 + 399 + 399 - 200 - 200 - 200 - 50 - 50);
   });
 
-  group("Calculate whatIf expense of 300 for different projections", () {
-    late DetailedBudget detailedBudget;
+  test("Calculate estimation with a daily expense allocation", () {
+    final detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [PeriodIncome(amount: 1000, description: '')],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: [
+          PeriodExpense(
+              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+        ]);
+    var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-03-01"));
 
-    setUp(() {
-      detailedBudget = DetailedBudget(
-          budgetDetails: BudgetDetails(
-              startingAmount: 500, startingMonth: DateTime.parse("2023-03-01")),
-          incomes: [
-            PeriodIncome(amount: 300)
-          ],
-          expenses: [
-            PeriodExpense(
-                amount: 40, startingFrom: DateTime.parse("2023-03-01")),
-            PeriodExpense(
-                amount: 10,
-                startingFrom: DateTime.parse("2023-05-01"),
-                applyUntil: DateTime.parse("2023-07-01"))
-          ]);
-    });
+    expect(result, 150);
+  });
 
-    test('Calculated a WhatIf expense for current Month', () {
-      var result = detailedBudget.estimateWhatIfISpend(
-          amount: 200,
-          startingFrom: DateTime.parse("2023-03-01"),
-          until: DateTime.parse("2023-07-01"),
-          projectFor: Projections.oneMonth);
+  test(
+      "Calculate estimation for current month with a daily expense allocation when monthly expense is under control",
+      () {
+    var detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [PeriodIncome(amount: 1000, description: '')],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: [
+          PeriodExpense(
+              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+        ]);
 
-      expect(result, equals(560));
-    });
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "stuff", amount: 100, day: DateTime.parse("2023-03-10"));
 
-    test('Calculated a WhatIf expense for next three months', () {
-      var result = detailedBudget.estimateWhatIfISpend(
-          amount: 200,
-          startingFrom: DateTime.parse("2023-03-01"),
-          until: DateTime.parse("2023-07-01"),
-          projectFor: Projections.threeMonths);
+    var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-03-01"));
 
-      expect(result, equals(670));
-    });
+    expect(result, 150);
+  });
 
-    test('Calculated a WhatIf expense for next six months', () {
-      var result = detailedBudget.estimateWhatIfISpend(
-          amount: 200,
-          startingFrom: DateTime.parse("2023-03-01"),
-          until: DateTime.parse("2023-07-01"),
-          projectFor: Projections.sixMonths);
+  test(
+      "Calculate estimation for current month with a daily expense allocation when monthly expense surpasses allocation",
+      () {
+    var detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [PeriodIncome(amount: 1000, description: '')],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: [
+          PeriodExpense(
+              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+        ]);
 
-      expect(result, equals(1030));
-    });
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "useless", amount: 300, day: DateTime.parse("2023-03-10"));
 
-    test('Calculated a WhatIf expense for one year months', () {
-      var result = detailedBudget.estimateWhatIfISpend(
-          amount: 200,
-          startingFrom: DateTime.parse("2023-03-01"),
-          until: DateTime.parse("2023-07-01"),
-          projectFor: Projections.oneYear);
+    var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-03-01"));
 
-      expect(result, equals(2590));
-    });
+    expect(result, 100);
+  });
 
-    test('Calculated a WhatIf expense for next three six but the expense starts two months later', () {
-      var result = detailedBudget.estimateWhatIfISpend(
-          amount: 200,
-          startingFrom: DateTime.parse("2023-05-01"),
-          until: DateTime.parse("2023-07-01"),
-          projectFor: Projections.sixMonths);
+  test(
+      "Calculate estimation for next month with a daily expense allocation when last monthly expenses is equal to allocation",
+      () {
+    var detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [PeriodIncome(amount: 1000, description: '')],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: [
+          PeriodExpense(
+              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+        ]);
 
-      expect(result, equals(1430));
-    });
-    
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "stuff", amount: 250, day: DateTime.parse("2023-03-10"));
+
+    var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-04-01"));
+
+    expect(result, 800);
+  });
+
+  test(
+      "Calculate estimation for next month with a daily expense allocation when last monthly expenses is less than allocation",
+      () {
+    var detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [PeriodIncome(amount: 1000, description: '')],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: [
+          PeriodExpense(
+              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+        ]);
+
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "stuff",
+        amount: 180, day: DateTime.parse("2023-03-10"));
+
+    var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-04-01"));
+
+    expect(result, 870);
+  });
+
+  test(
+      "Calculate estimation for next month with a daily expense allocation when last monthly expenses is more than allocation",
+      () {
+    var detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [PeriodIncome(amount: 1000, description: '')],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: [
+          PeriodExpense(
+              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+        ]);
+
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "stuff",
+        amount: 300, day: DateTime.parse("2023-03-10"));
+
+    var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-04-01"));
+
+    expect(result, 750);
+  });
+
+  test("Calculate estimation for 3 month later with a daily expense allocation",
+      () {
+    var detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [PeriodIncome(amount: 1000, description: '')],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: [
+          PeriodExpense(
+              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+        ]);
+
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "Pizza", amount: 300, day: DateTime.parse("2023-03-10"));
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "Car", amount: 80, day: DateTime.parse("2023-04-10"));
+
+    var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-05-01"));
+
+    expect(result, 1570);
   });
 }
 
