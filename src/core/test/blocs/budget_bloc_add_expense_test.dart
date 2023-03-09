@@ -105,7 +105,8 @@ void main() {
       act: (bloc) => bloc.add(AddPeriodExpense(
           amount: 60,
           startingFrom: expenseStartMonth,
-          applyUntil: expenseEndDate, description: 'amazon')),
+          applyUntil: expenseEndDate,
+          description: 'amazon')),
       expect: () => [
             DetailedBudget(
                 budgetDetails: actualBudgetDetails, isAddingExpense: true),
@@ -116,14 +117,16 @@ void main() {
                   PeriodExpense(
                       amount: 60,
                       startingFrom: expenseStartMonth,
-                      applyUntil: expenseEndDate, description: 'amazon')
+                      applyUntil: expenseEndDate,
+                      description: 'amazon')
                 ])
           ],
       verify: (_) {
         verify(() => budgetRepository.addPeriodExpense(PeriodExpense(
             amount: 60,
             startingFrom: expenseStartMonth,
-            applyUntil: expenseEndDate, description: 'amazon'))).called(1);
+            applyUntil: expenseEndDate,
+            description: 'amazon'))).called(1);
         verifyNoMoreInteractions(budgetRepository);
       });
 }

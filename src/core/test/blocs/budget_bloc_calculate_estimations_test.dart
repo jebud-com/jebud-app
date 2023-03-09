@@ -60,7 +60,10 @@ void main() {
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399, description: ''), PeriodIncome(amount: 200, description: '')],
+        incomes: [
+          PeriodIncome(amount: 399, description: ''),
+          PeriodIncome(amount: 200, description: '')
+        ],
         expected: 500 + 399 * 3 + 200 * 3);
   });
 
@@ -73,7 +76,10 @@ void main() {
         startingMonth: startingMonth,
         targetMonth: startingMonth,
         incomes: [PeriodIncome(amount: 399, description: '')],
-        expenses: [PeriodExpense(amount: 200, description: 'netflix', startingFrom: startingMonth)],
+        expenses: [
+          PeriodExpense(
+              amount: 200, description: 'netflix', startingFrom: startingMonth)
+        ],
         expected: 400 + 399 - 200);
   });
 
@@ -87,7 +93,10 @@ void main() {
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
         incomes: [PeriodIncome(amount: 399, description: '')],
-        expenses: [PeriodExpense(amount: 200, startingFrom: startingMonth, description: '')],
+        expenses: [
+          PeriodExpense(
+              amount: 200, startingFrom: startingMonth, description: '')
+        ],
         expected: 400 + 399 + 399 + 399 - 200 - 200 - 200);
   });
 
@@ -105,8 +114,10 @@ void main() {
           PeriodIncome(amount: 399, description: ''),
         ],
         expenses: [
-          PeriodExpense(amount: 200, startingFrom: startingMonth, description: ''),
-          PeriodExpense(amount: 60, startingFrom: oneMonthLater, description: '')
+          PeriodExpense(
+              amount: 200, startingFrom: startingMonth, description: ''),
+          PeriodExpense(
+              amount: 60, startingFrom: oneMonthLater, description: '')
         ],
         expected: 400 + 399 + 399 + 399 - 200 - 200 - 200 - 60 - 60);
   });
@@ -123,11 +134,13 @@ void main() {
         targetMonth: threeMonthsLater,
         incomes: [PeriodIncome(amount: 399, description: '')],
         expenses: [
-          PeriodExpense(amount: 200, startingFrom: startingMonth, description: ''),
+          PeriodExpense(
+              amount: 200, startingFrom: startingMonth, description: ''),
           PeriodExpense(
               amount: 50,
               startingFrom: startingMonth,
-              applyUntil: twoMonthsLater, description: '')
+              applyUntil: twoMonthsLater,
+              description: '')
         ],
         expected: 400 + 399 + 399 + 399 - 200 - 200 - 200 - 50 - 50);
   });
@@ -140,7 +153,9 @@ void main() {
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
-              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+              amount: 100,
+              startingFrom: DateTime.parse("2023-03-01"),
+              description: ''),
         ]);
     var result =
         detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-03-01"));
@@ -158,7 +173,9 @@ void main() {
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
-              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+              amount: 100,
+              startingFrom: DateTime.parse("2023-03-01"),
+              description: ''),
         ]);
 
     detailedBudget = detailedBudget.addDailyExpense(
@@ -180,7 +197,9 @@ void main() {
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
-              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+              amount: 100,
+              startingFrom: DateTime.parse("2023-03-01"),
+              description: ''),
         ]);
 
     detailedBudget = detailedBudget.addDailyExpense(
@@ -202,7 +221,9 @@ void main() {
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
-              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+              amount: 100,
+              startingFrom: DateTime.parse("2023-03-01"),
+              description: ''),
         ]);
 
     detailedBudget = detailedBudget.addDailyExpense(
@@ -224,12 +245,13 @@ void main() {
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
-              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+              amount: 100,
+              startingFrom: DateTime.parse("2023-03-01"),
+              description: ''),
         ]);
 
     detailedBudget = detailedBudget.addDailyExpense(
-        description: "stuff",
-        amount: 180, day: DateTime.parse("2023-03-10"));
+        description: "stuff", amount: 180, day: DateTime.parse("2023-03-10"));
 
     var result =
         detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-04-01"));
@@ -247,12 +269,13 @@ void main() {
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
-              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+              amount: 100,
+              startingFrom: DateTime.parse("2023-03-01"),
+              description: ''),
         ]);
 
     detailedBudget = detailedBudget.addDailyExpense(
-        description: "stuff",
-        amount: 300, day: DateTime.parse("2023-03-10"));
+        description: "stuff", amount: 300, day: DateTime.parse("2023-03-10"));
 
     var result =
         detailedBudget.estimateSavingsUpTo(DateTime.parse("2023-04-01"));
@@ -269,7 +292,9 @@ void main() {
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
-              amount: 100, startingFrom: DateTime.parse("2023-03-01"), description: ''),
+              amount: 100,
+              startingFrom: DateTime.parse("2023-03-01"),
+              description: ''),
         ]);
 
     detailedBudget = detailedBudget.addDailyExpense(

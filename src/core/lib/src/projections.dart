@@ -1,4 +1,1 @@
-﻿
-enum Projections {
- oneMonth, threeMonths, sixMonths, oneYear 
-}
+enum Projections { oneMonth, threeMonths, sixMonths, oneYear }

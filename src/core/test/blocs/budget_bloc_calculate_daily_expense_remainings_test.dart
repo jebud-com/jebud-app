@@ -1,4 +1,4 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:core/src/entities/daily_expense_period_allocation.dart';
 import 'package:test/test.dart';
 
@@ -138,7 +138,10 @@ void main() {
       test("daily Expense - next day of month and two excessive daily expense",
           () {
         var dailyLeft = dailyExcessiveSpentBudgetDetails
-            .addDailyExpense(amount: 12.67, day:DateTime.parse("2023-01-02") , description: '')
+            .addDailyExpense(
+                amount: 12.67,
+                day: DateTime.parse("2023-01-02"),
+                description: '')
             .getLeftDailyExpenseForRunningDay(DateTime.parse("2023-01-02"));
         expect(dailyLeft, equals(0));
       });
