@@ -128,46 +128,50 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
       [budgetDetails, incomes, isAddingIncome, isAddingExpense, expenses];
 
   double estimateSavingsUpTo(DateTime targetMonth) {
-    if (budgetDetails.startingMonth.millisecondsSinceEpoch -
-            targetMonth.millisecondsSinceEpoch >
-        0) return 0;
+    if (budgetDetails.startingMonth.isAfter(targetMonth)) return 0;
 
     double result = budgetDetails.startingAmount;
     var startMonth = budgetDetails.startingMonth;
 
+    final totalIncomes =
+        incomes.fold(0.0, (value, element) => value + element.amount);
+
     for (int i = 0; i < _numberOfMonthsToTargetMonth(targetMonth); i++) {
-      var currentMonth =
+      final currentMonth =
           DateTime(startMonth.year, startMonth.month + i, startMonth.day);
-      result = result +
-          incomes.fold(0.0, (value, element) => value + element.amount);
-      result = result -
-          expenses.fold(
-              0.0,
-              (value, element) =>
-                  value +
-                  ((element.applyUntil.millisecondsSinceEpoch -
-                                  currentMonth.millisecondsSinceEpoch >=
-                              0 &&
-                          element.startingFrom.millisecondsSinceEpoch -
-                                  currentMonth.millisecondsSinceEpoch <=
-                              0)
-                      ? element.amount
-                      : 0));
+      result = result + totalIncomes;
+      result = result - _expensesFor(currentMonth);
     }
 
-    return result -
-        max(
-            dailyExpenseAllocation.amount,
-            _dailyExpenses
-                .where((element) =>
-                    element.day.month == targetMonth.month &&
-                    element.day.year == targetMonth.year)
-                .fold(0, (value, element) => value + element.amount)) -
+    final maxBetweenAllocationAndTotalExpensesOfTheMonth = max(
+        dailyExpenseAllocation.amount,
         _dailyExpenses
             .where((element) =>
-                element.day.month < targetMonth.month &&
-                element.day.year <= targetMonth.year)
-            .fold(0, (value, element) => value + element.amount);
+                element.day.month == targetMonth.month &&
+                element.day.year == targetMonth.year)
+            .fold(0.0, (value, element) => value + element.amount));
+
+    final allEarlierExpenses = _dailyExpenses
+        .where((element) =>
+            element.day.month < targetMonth.month &&
+            element.day.year <= targetMonth.year)
+        .fold(0.0, (value, element) => value + element.amount);
+
+    return result -
+        maxBetweenAllocationAndTotalExpensesOfTheMonth -
+        allEarlierExpenses;
+  }
+
+  double _expensesFor(DateTime month) {
+    return expenses.fold(0.0, (value, element) {
+      if (element.applyUntil.isAtSameMomentAs(month) ||
+          element.startingFrom.isAtSameMomentAs(month) ||
+          element.applyUntil.isAfter(month) &&
+              element.startingFrom.isBefore(month)) {
+        return value + element.amount;
+      }
+      return value;
+    });
   }
 
   int _numberOfMonthsToTargetMonth(DateTime targetMonth) {
@@ -183,7 +187,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
     final yearDifference = firstDayOfTargetMonth.year - startingMonth.year;
 
     return (firstDayOfTargetMonth.month - startingMonth.month) +
-        12 * yearDifference +
+        DateTime.monthsPerYear * yearDifference +
         1;
   }
 
@@ -195,7 +199,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
     final yearDifference = firstDayOfTargetMonth.year - startingMonth.year;
 
     return (firstDayOfTargetMonth.month - startingMonth.month) +
-        12 * yearDifference;
+        DateTime.monthsPerYear * yearDifference;
   }
 
   double estimateWhatIfISpend(
@@ -246,25 +250,28 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   }
 
   double getLeftDailyExpenseForRunningDay(DateTime today) {
-    return double.parse((((dailyExpenseAllocation.amount -
-                    _dailyExpenses
-                        .where((element) =>
-                            element.day.month == today.month &&
-                            element.day.year == today.year &&
-                            element.day.day < today.day)
-                        .fold(
-                            0.0, (value, element) => value + element.amount)) /
-                (DateTime(today.year, today.month + 1, 0).day -
-                    today.day +
-                    1)) -
-            _dailyExpenses
-                .where((element) =>
-                    element.day.day == today.day &&
-                    element.day.month == today.month &&
-                    element.day.year == today.year)
-                .fold(0.0,
-                    (previousValue, element) => previousValue + element.amount))
-        .toStringAsFixed(2));
+    final earlierExpenseOfThisMonth = _dailyExpenses
+        .where((element) =>
+            element.day.month == today.month &&
+            element.day.year == today.year &&
+            element.day.day < today.day)
+        .fold(0.0, (value, element) => value + element.amount);
+
+    final earlierExpenseOfToday = _dailyExpenses
+        .where((element) =>
+            element.day.day == today.day &&
+            element.day.month == today.month &&
+            element.day.year == today.year)
+        .fold(0.0, (previousValue, element) => previousValue + element.amount);
+
+    final endOfMonth = DateTime(today.year, today.month + 1, 0);
+    final diffInDaysToEndOfMonth = endOfMonth.difference(today).inDays + 1;
+
+    return double.parse(
+        ((dailyExpenseAllocation.amount - earlierExpenseOfThisMonth) /
+                    diffInDaysToEndOfMonth -
+                earlierExpenseOfToday)
+            .toStringAsFixed(2));
   }
 
   double getLeftDailyExpenseForRunningWeek(DateTime today) {
@@ -276,12 +283,11 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   }
 
   double getLeftDailyExpenseForRunningMonth(DateTime today) {
-    return dailyExpenseAllocation.amount -
-        _dailyExpenses
-            .where((element) =>
-                element.day.month == today.month &&
-                element.day.year == today.year)
-            .fold(0.0, (value, element) => value + element.amount);
+    final allExpensesOfCurrentMonth = _dailyExpenses
+        .where((element) =>
+            element.day.month == today.month && element.day.year == today.year)
+        .fold(0.0, (value, element) => value + element.amount);
+    return dailyExpenseAllocation.amount - allExpensesOfCurrentMonth;
   }
 }
 
