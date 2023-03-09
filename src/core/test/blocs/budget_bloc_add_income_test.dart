@@ -1,5 +1,4 @@
 @Timeout(Duration(seconds: 10))
-
 import 'package:bloc_test/bloc_test.dart';
 import 'package:core/src/blocs/budget_bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
@@ -15,12 +14,13 @@ void main() {
   late MockBudgetRepository budgetRepository;
   MockDateTimeService dateTimeService = MockDateTimeService();
 
-  final PeriodIncome existingPeriodIncome = PeriodIncome(amount: 2400);
+  final PeriodIncome existingPeriodIncome =
+      PeriodIncome(amount: 2400, description: 'Salary');
   final BudgetDetails existingBudgetDetails =
       BudgetDetails(startingAmount: 500, startingMonth: DateTime.now());
 
   setUp(() {
-    registerFallbackValue(PeriodIncome(amount: 0));
+    registerFallbackValue(PeriodIncome(amount: 0, description: ''));
     budgetRepository = MockBudgetRepository();
     budgetBloc = BudgetManagerBloc(budgetRepository, dateTimeService);
   });
@@ -37,7 +37,8 @@ void main() {
         when(() => budgetRepository.addPeriodIncome(
             any(that: isA<PeriodIncome>()))).thenAnswer((_) => Future.value());
       },
-      act: (bloc) => bloc.add(AddPeriodIncome(amount: 2400)),
+      act: (bloc) =>
+          bloc.add(AddPeriodIncome(amount: 2400, description: 'salary')),
       expect: () => [
             DetailedBudget(
                 budgetDetails: existingBudgetDetails,
@@ -45,17 +46,17 @@ void main() {
                 isAddingIncome: true),
             DetailedBudget(
                 budgetDetails: existingBudgetDetails,
-                incomes: [PeriodIncome(amount: 2400)],
+                incomes: [PeriodIncome(amount: 2400, description: 'salary')],
                 isAddingIncome: false)
           ],
       verify: (_) {
-        verify(() =>
-                budgetRepository.addPeriodIncome(PeriodIncome(amount: 2400)))
-            .called(1);
+        verify(() => budgetRepository.addPeriodIncome(
+            PeriodIncome(amount: 2400, description: 'salary'))).called(1);
         verifyNoMoreInteractions(budgetRepository);
       });
 
-  PeriodIncome expectedPeriodIncome = PeriodIncome(amount: 600);
+  PeriodIncome expectedPeriodIncome =
+      PeriodIncome(amount: 600, description: 'something else');
   blocTest<BudgetManagerBloc, BudgetManagerBlocState>(
       'Add second budget period income',
       build: () => budgetBloc,
@@ -66,7 +67,8 @@ void main() {
         when(() => budgetRepository.addPeriodIncome(
             any(that: isA<PeriodIncome>()))).thenAnswer((_) => Future.value());
       },
-      act: (bloc) => bloc.add(AddPeriodIncome(amount: 600)),
+      act: (bloc) =>
+          bloc.add(AddPeriodIncome(amount: 600, description: 'something else')),
       expect: () => [
             DetailedBudget(
                 budgetDetails: existingBudgetDetails,
@@ -78,8 +80,8 @@ void main() {
                 isAddingIncome: false)
           ],
       verify: (_) {
-        verify(() =>
-                budgetRepository.addPeriodIncome(PeriodIncome(amount: 600)))
+        verify(() => budgetRepository.addPeriodIncome(
+                PeriodIncome(amount: 600, description: 'something else')))
             .called(1);
         verifyNoMoreInteractions(budgetRepository);
       });

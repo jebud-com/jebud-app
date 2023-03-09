@@ -39,30 +39,32 @@ class BudgetManagerBloc
     emit(DetailedBudget.copyFromWith(state as DetailedBudget,
         isAddingIncome: true));
 
-    final income = PeriodIncome(amount: event.amount);
+    final income =
+        PeriodIncome(amount: event.amount, description: event.description);
     await _budgetRepository.addPeriodIncome(income);
 
-    final currentDetailedBudtet = (state as DetailedBudget);
+    final currentDetailedBudget = (state as DetailedBudget);
     emit(DetailedBudget.copyFromWith(state as DetailedBudget,
         isAddingIncome: false,
-        incomes: [...currentDetailedBudtet.incomes, income]));
+        incomes: [...currentDetailedBudget.incomes, income]));
   }
 
   void _addPeriodExpense(AddPeriodExpense event, Emitter emit) async {
-    final currentDetailedBudtet = (state as DetailedBudget);
-    emit(DetailedBudget.copyFromWith(currentDetailedBudtet,
+    final currentDetailedBudget = (state as DetailedBudget);
+    emit(DetailedBudget.copyFromWith(currentDetailedBudget,
         isAddingExpense: true));
 
     final expense = PeriodExpense(
         amount: event.amount,
+        description: event.description,
         startingFrom:
             event.startingFrom ?? _dateTimeService.startOfCurrentMonth,
         applyUntil: event.applyUntil);
     await _budgetRepository.addPeriodExpense(expense);
 
-    emit(DetailedBudget.copyFromWith(currentDetailedBudtet,
+    emit(DetailedBudget.copyFromWith(currentDetailedBudget,
         isAddingExpense: false,
-        expenses: [...currentDetailedBudtet.expenses, expense]));
+        expenses: [...currentDetailedBudget.expenses, expense]));
   }
 }
 
@@ -209,7 +211,9 @@ class SetupBudgetDetails extends BudgetManagerBlocEvent {
 class AddPeriodIncome extends BudgetManagerBlocEvent {
   final double amount;
 
-  AddPeriodIncome({required this.amount});
+  final String description;
+
+  AddPeriodIncome({required this.amount, required this.description});
 }
 
 class AddPeriodExpense extends BudgetManagerBlocEvent {
@@ -217,5 +221,11 @@ class AddPeriodExpense extends BudgetManagerBlocEvent {
   final DateTime? applyUntil;
   final DateTime? startingFrom;
 
-  AddPeriodExpense({required this.amount, this.applyUntil, this.startingFrom});
+  final String description;
+
+  AddPeriodExpense(
+      {required this.amount,
+      required this.description,
+      this.applyUntil,
+      this.startingFrom});
 }

@@ -21,46 +21,46 @@ void main() {
     expect(detailedBudget.estimateSavingsUpTo(DateTime.now()), equals(500));
   });
 
-  test('Cacluate estimation with one income', () {
+  test('Calculate estimation with one income', () {
     var startingMonth = DateTime.parse("2023-03-01");
     calculateEstimationForMonthsAndForIncomes(
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: startingMonth,
-        incomes: [PeriodIncome(amount: 399)],
+        incomes: [PeriodIncome(amount: 399, description: '')],
         expected: 500 + 399);
   });
 
-  test('Cacluate estimation with one income after 3 months', () {
+  test('Calculate estimation with one income after 3 months', () {
     var startingMonth = DateTime.parse("2023-03-01");
     var threeMonthsLater = DateTime.parse("2023-05-01");
     calculateEstimationForMonthsAndForIncomes(
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399)],
+        incomes: [PeriodIncome(amount: 399, description: '')],
         expected: 500 + 399 + 399 + 399);
   });
 
-  test('Cacluate estimation with one income after 16 months', () {
+  test('Calculate estimation with one income after 16 months', () {
     var startingMonth = DateTime.parse("2023-03-01");
     var sixteenMonthsLater = DateTime.parse("2024-06-01");
     calculateEstimationForMonthsAndForIncomes(
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: sixteenMonthsLater,
-        incomes: [PeriodIncome(amount: 399)],
+        incomes: [PeriodIncome(amount: 399, description: '')],
         expected: 500 + 399 * 16);
   });
 
-  test('Calculte estimation with many incomes after 3 months', () {
+  test('Calculate estimation with many incomes after 3 months', () {
     var startingMonth = DateTime.parse("2023-03-01");
     var threeMonthsLater = DateTime.parse("2023-05-01");
     calculateEstimationForMonthsAndForIncomes(
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399), PeriodIncome(amount: 200)],
+        incomes: [PeriodIncome(amount: 399, description: ''), PeriodIncome(amount: 200, description: '')],
         expected: 500 + 399 * 3 + 200 * 3);
   });
 
@@ -72,8 +72,8 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: startingMonth,
-        incomes: [PeriodIncome(amount: 399)],
-        expenses: [PeriodExpense(amount: 200, startingFrom: startingMonth)],
+        incomes: [PeriodIncome(amount: 399, description: '')],
+        expenses: [PeriodExpense(amount: 200, description: 'netflix', startingFrom: startingMonth)],
         expected: 400 + 399 - 200);
   });
 
@@ -86,8 +86,8 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399)],
-        expenses: [PeriodExpense(amount: 200, startingFrom: startingMonth)],
+        incomes: [PeriodIncome(amount: 399, description: '')],
+        expenses: [PeriodExpense(amount: 200, startingFrom: startingMonth, description: '')],
         expected: 400 + 399 + 399 + 399 - 200 - 200 - 200);
   });
 
@@ -102,11 +102,11 @@ void main() {
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
         incomes: [
-          PeriodIncome(amount: 399),
+          PeriodIncome(amount: 399, description: ''),
         ],
         expenses: [
-          PeriodExpense(amount: 200, startingFrom: startingMonth),
-          PeriodExpense(amount: 60, startingFrom: oneMonthLater)
+          PeriodExpense(amount: 200, startingFrom: startingMonth, description: ''),
+          PeriodExpense(amount: 60, startingFrom: oneMonthLater, description: '')
         ],
         expected: 400 + 399 + 399 + 399 - 200 - 200 - 200 - 60 - 60);
   });
@@ -121,13 +121,13 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399)],
+        incomes: [PeriodIncome(amount: 399, description: '')],
         expenses: [
-          PeriodExpense(amount: 200, startingFrom: startingMonth),
+          PeriodExpense(amount: 200, startingFrom: startingMonth, description: ''),
           PeriodExpense(
               amount: 50,
               startingFrom: startingMonth,
-              applyUntil: twoMonthsLater)
+              applyUntil: twoMonthsLater, description: '')
         ],
         expected: 400 + 399 + 399 + 399 - 200 - 200 - 200 - 50 - 50);
   });
