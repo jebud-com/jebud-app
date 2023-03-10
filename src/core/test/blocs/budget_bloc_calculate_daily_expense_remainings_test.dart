@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 import 'package:core/src/entities/daily_expense_period_allocation.dart';
 import 'package:test/test.dart';
 
+import 'extensions/detailed_budget_ext.dart';
+
 void main() {
   group('monthly, weekly and daily amount of daily expenses', () {
     var budgetDetails = DetailedBudget(

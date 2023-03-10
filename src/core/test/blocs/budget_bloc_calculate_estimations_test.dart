@@ -1,5 +1,6 @@
 import 'package:core/src/blocs/budget_bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
+import 'extensions/detailed_budget_ext.dart';
 import 'package:core/src/entities/daily_expense_period_allocation.dart';
 import 'package:core/src/entities/period_expense.dart';
 import 'package:core/src/entities/period_income.dart';
@@ -326,3 +327,4 @@ void calculateEstimationForMonthsAndForIncomes(
 
   expect(result, expected);
 }
+

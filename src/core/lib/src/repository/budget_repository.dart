@@ -1,3 +1,4 @@
+import 'package:core/src/entities/daily_expense.dart';
 import 'package:core/src/entities/period_expense.dart';
 import 'package:core/src/entities/period_income.dart';
 
@@ -13,4 +14,6 @@ abstract class BudgetRepository {
 
   Future addDailyExpenseAllocation(
       DailyExpensePeriodAllocation dailyExpensePeriodAllocation);
+
+  Future addDailyExpense(DailyExpense dailExpense);
 }

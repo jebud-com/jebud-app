@@ -27,6 +27,7 @@ class BudgetManagerBloc
     on<AddPeriodIncome>(_addPeriodIncome);
     on<AddPeriodExpense>(_addPeriodExpense);
     on<AddDailyExpenseAllocation>(_addDailyExpenseAllocation);
+    on<AddDailyExpense>(_addDailyExpense);
   }
 
   void _setupBudgetDetails(SetupBudgetDetails event, Emitter emit) async {
@@ -81,6 +82,18 @@ class BudgetManagerBloc
         isAddingDailyExpenseAllocation: false,
         dailyExpenseAllocation: dailyExpenseAllocation));
   }
+
+  void _addDailyExpense(AddDailyExpense event, Emitter emit) async {
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+        isAddingDailyExpense: true));
+    var dailyExpense = DailyExpense(
+        amount: event.amount,
+        day: _dateTimeService.today,
+        description: event.description);
+    await _budgetRepository.addDailyExpense(dailyExpense);
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+        isAddingDailyExpense: false, dailyExpenses: [dailyExpense]));
+  }
 }
 
 class UninitializedBudget extends BudgetManagerBlocState {}
@@ -90,39 +103,29 @@ class InitializingBudget extends BudgetManagerBlocState {}
 class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   final BudgetDetails budgetDetails;
   late final List<PeriodIncome> incomes;
-  late final List<DailyExpense> _dailyExpenses;
+  late final List<DailyExpense> dailyExpenses;
   late final List<PeriodExpense> expenses;
   late final DailyExpensePeriodAllocation dailyExpenseAllocation;
   final bool isAddingIncome;
   final bool isAddingExpense;
+  final bool isAddingDailyExpense;
   final bool isAddingDailyExpenseAllocation;
 
   DetailedBudget(
       {required this.budgetDetails,
       List<PeriodIncome>? incomes,
       List<PeriodExpense>? expenses,
+      List<DailyExpense>? dailyExpenses,
       this.isAddingIncome = false,
       this.isAddingExpense = false,
+      this.isAddingDailyExpense = false,
       this.isAddingDailyExpenseAllocation = false,
       DailyExpensePeriodAllocation? dailyExpenseAllocation}) {
     this.incomes = incomes ?? [];
     this.expenses = expenses ?? [];
-    _dailyExpenses = [];
+    this.dailyExpenses = dailyExpenses ?? [];
     this.dailyExpenseAllocation =
         dailyExpenseAllocation ?? DailyExpensePeriodAllocation.zero();
-  }
-
-  DetailedBudget._internal({
-    required this.budgetDetails,
-    required this.incomes,
-    required this.expenses,
-    required List<DailyExpense> dailyExpenses,
-    required this.dailyExpenseAllocation,
-    required this.isAddingIncome,
-    required this.isAddingExpense,
-    required this.isAddingDailyExpenseAllocation,
-  }) {
-    _dailyExpenses = dailyExpenses;
   }
 
   factory DetailedBudget.copyFromWith(DetailedBudget oldDetailedBudget,
@@ -131,27 +134,32 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
           List<DailyExpense>? dailyExpenses,
           bool? isAddingExpense,
           bool? isAddingIncome,
+          bool? isAddingDailyExpense,
           bool? isAddingDailyExpenseAllocation,
           DailyExpensePeriodAllocation? dailyExpenseAllocation}) =>
-      DetailedBudget._internal(
+      DetailedBudget(
           budgetDetails: oldDetailedBudget.budgetDetails,
           incomes: incomes ?? oldDetailedBudget.incomes,
           expenses: expenses ?? oldDetailedBudget.expenses,
           dailyExpenseAllocation: dailyExpenseAllocation ??
               oldDetailedBudget.dailyExpenseAllocation,
-          dailyExpenses: dailyExpenses ?? oldDetailedBudget._dailyExpenses,
+          dailyExpenses: dailyExpenses ?? oldDetailedBudget.dailyExpenses,
           isAddingDailyExpenseAllocation: isAddingDailyExpenseAllocation ??
               oldDetailedBudget.isAddingDailyExpenseAllocation,
           isAddingExpense: isAddingExpense ?? oldDetailedBudget.isAddingExpense,
+          isAddingDailyExpense:
+              isAddingDailyExpense ?? oldDetailedBudget.isAddingDailyExpense,
           isAddingIncome: isAddingIncome ?? oldDetailedBudget.isAddingIncome);
 
   @override
   List<Object?> get props => [
         budgetDetails,
         incomes,
+        dailyExpenses,
+        expenses,
         isAddingIncome,
         isAddingExpense,
-        expenses,
+        isAddingDailyExpense,
         isAddingDailyExpenseAllocation
       ];
 
@@ -173,13 +181,13 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
 
     final maxBetweenAllocationAndTotalExpensesOfTheMonth = max(
         dailyExpenseAllocation.amount,
-        _dailyExpenses
+        dailyExpenses
             .where((element) =>
                 element.day.month == targetMonth.month &&
                 element.day.year == targetMonth.year)
             .fold(0.0, (value, element) => value + element.amount));
 
-    final allEarlierExpenses = _dailyExpenses
+    final allEarlierExpenses = dailyExpenses
         .where((element) =>
             element.day.month < targetMonth.month &&
             element.day.year <= targetMonth.year)
@@ -267,25 +275,15 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
     return balance - amount * numberOfMonthsApplicable;
   }
 
-  DetailedBudget addDailyExpense(
-      {required double amount,
-      required DateTime day,
-      required String description}) {
-    return DetailedBudget.copyFromWith(this, dailyExpenses: [
-      ..._dailyExpenses,
-      DailyExpense(description: description, amount: amount, day: day)
-    ]);
-  }
-
   double getLeftDailyExpenseForRunningDay(DateTime today) {
-    final earlierExpenseOfThisMonth = _dailyExpenses
+    final earlierExpenseOfThisMonth = dailyExpenses
         .where((element) =>
             element.day.month == today.month &&
             element.day.year == today.year &&
             element.day.day < today.day)
         .fold(0.0, (value, element) => value + element.amount);
 
-    final earlierExpenseOfToday = _dailyExpenses
+    final earlierExpenseOfToday = dailyExpenses
         .where((element) =>
             element.day.day == today.day &&
             element.day.month == today.month &&
@@ -311,7 +309,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   }
 
   double getLeftDailyExpenseForRunningMonth(DateTime today) {
-    final allExpensesOfCurrentMonth = _dailyExpenses
+    final allExpensesOfCurrentMonth = dailyExpenses
         .where((element) =>
             element.day.month == today.month && element.day.year == today.year)
         .fold(0.0, (value, element) => value + element.amount);
@@ -351,4 +349,11 @@ class AddDailyExpenseAllocation extends BudgetManagerBlocEvent {
   final double amount;
 
   AddDailyExpenseAllocation({required this.amount});
+}
+
+class AddDailyExpense extends BudgetManagerBlocEvent {
+  final double amount;
+  final String description;
+
+  AddDailyExpense({required this.amount, required this.description});
 }
