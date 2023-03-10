@@ -26,6 +26,7 @@ class BudgetManagerBloc
     on<SetupBudgetDetails>(_setupBudgetDetails);
     on<AddPeriodIncome>(_addPeriodIncome);
     on<AddPeriodExpense>(_addPeriodExpense);
+    on<AddDailyExpenseAllocation>(_addDailyExpenseAllocation);
   }
 
   void _setupBudgetDetails(SetupBudgetDetails event, Emitter emit) async {
@@ -68,6 +69,18 @@ class BudgetManagerBloc
         isAddingExpense: false,
         expenses: [...currentDetailedBudget.expenses, expense]));
   }
+
+  void _addDailyExpenseAllocation(AddDailyExpenseAllocation event,
+      Emitter<BudgetManagerBlocState> emit) async {
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+        isAddingDailyExpenseAllocation: true));
+    var dailyExpenseAllocation =
+        DailyExpensePeriodAllocation(amount: event.amount);
+    await _budgetRepository.addDailyExpenseAllocation(dailyExpenseAllocation);
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+        isAddingDailyExpenseAllocation: false,
+        dailyExpenseAllocation: dailyExpenseAllocation));
+  }
 }
 
 class UninitializedBudget extends BudgetManagerBlocState {}
@@ -82,6 +95,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   late final DailyExpensePeriodAllocation dailyExpenseAllocation;
   final bool isAddingIncome;
   final bool isAddingExpense;
+  final bool isAddingDailyExpenseAllocation;
 
   DetailedBudget(
       {required this.budgetDetails,
@@ -89,6 +103,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
       List<PeriodExpense>? expenses,
       this.isAddingIncome = false,
       this.isAddingExpense = false,
+      this.isAddingDailyExpenseAllocation = false,
       DailyExpensePeriodAllocation? dailyExpenseAllocation}) {
     this.incomes = incomes ?? [];
     this.expenses = expenses ?? [];
@@ -97,35 +112,48 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
         dailyExpenseAllocation ?? DailyExpensePeriodAllocation.zero();
   }
 
-  DetailedBudget._internal(
-      {required this.budgetDetails,
-      required this.incomes,
-      required this.expenses,
-      required List<DailyExpense> dailyExpenses,
-      required this.isAddingIncome,
-      required this.isAddingExpense,
-      required this.dailyExpenseAllocation}) {
+  DetailedBudget._internal({
+    required this.budgetDetails,
+    required this.incomes,
+    required this.expenses,
+    required List<DailyExpense> dailyExpenses,
+    required this.dailyExpenseAllocation,
+    required this.isAddingIncome,
+    required this.isAddingExpense,
+    required this.isAddingDailyExpenseAllocation,
+  }) {
     _dailyExpenses = dailyExpenses;
   }
 
   factory DetailedBudget.copyFromWith(DetailedBudget oldDetailedBudget,
           {List<PeriodIncome>? incomes,
           List<PeriodExpense>? expenses,
-          bool? isAddingExpense,
           List<DailyExpense>? dailyExpenses,
-          bool? isAddingIncome}) =>
+          bool? isAddingExpense,
+          bool? isAddingIncome,
+          bool? isAddingDailyExpenseAllocation,
+          DailyExpensePeriodAllocation? dailyExpenseAllocation}) =>
       DetailedBudget._internal(
           budgetDetails: oldDetailedBudget.budgetDetails,
           incomes: incomes ?? oldDetailedBudget.incomes,
           expenses: expenses ?? oldDetailedBudget.expenses,
-          dailyExpenseAllocation: oldDetailedBudget.dailyExpenseAllocation,
+          dailyExpenseAllocation: dailyExpenseAllocation ??
+              oldDetailedBudget.dailyExpenseAllocation,
           dailyExpenses: dailyExpenses ?? oldDetailedBudget._dailyExpenses,
+          isAddingDailyExpenseAllocation: isAddingDailyExpenseAllocation ??
+              oldDetailedBudget.isAddingDailyExpenseAllocation,
           isAddingExpense: isAddingExpense ?? oldDetailedBudget.isAddingExpense,
           isAddingIncome: isAddingIncome ?? oldDetailedBudget.isAddingIncome);
 
   @override
-  List<Object?> get props =>
-      [budgetDetails, incomes, isAddingIncome, isAddingExpense, expenses];
+  List<Object?> get props => [
+        budgetDetails,
+        incomes,
+        isAddingIncome,
+        isAddingExpense,
+        expenses,
+        isAddingDailyExpenseAllocation
+      ];
 
   double estimateSavingsUpTo(DateTime targetMonth) {
     if (budgetDetails.startingMonth.isAfter(targetMonth)) return 0;
@@ -317,4 +345,10 @@ class AddPeriodExpense extends BudgetManagerBlocEvent {
       required this.description,
       this.applyUntil,
       this.startingFrom});
+}
+
+class AddDailyExpenseAllocation extends BudgetManagerBlocEvent {
+  final double amount;
+
+  AddDailyExpenseAllocation({required this.amount});
 }
