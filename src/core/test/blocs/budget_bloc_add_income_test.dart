@@ -25,7 +25,7 @@ void main() {
     budgetBloc = BudgetManagerBloc(budgetRepository, dateTimeService);
   });
 
-  test('Initial state - Unintialized', () {
+  test('Initial state - Uninitialized', () {
     expect(budgetBloc.state, isA<UninitializedBudget>());
   });
 
