@@ -1,4 +1,4 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:infrastructure/src/models/budget_details_model.dart';
 import 'package:infrastructure/src/models/daily_expense_model.dart';
 import 'package:infrastructure/src/models/daily_expense_period_allocation_model.dart';
@@ -16,7 +16,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     _isarInstance = await Isar.open([
       DailyExpenseModelSchema,
       DailyExpensePeriodAllocationModelSchema,
-      PeriodExpenseModelSchema, 
+      PeriodExpenseModelSchema,
       PeriodIncomeModelSchema,
       BudgetDetailsModelSchema
     ], name: _connectionString);

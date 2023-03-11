@@ -1,11 +1,12 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:isar/isar.dart';
 import '../utils.dart';
 
 part 'daily_expense_period_allocation_model.g.dart';
 
 @collection
-class DailyExpensePeriodAllocationModel extends HasIsarId implements MapsTo<DailyExpensePeriodAllocation> {
+class DailyExpensePeriodAllocationModel extends HasIsarId
+    implements MapsTo<DailyExpensePeriodAllocation> {
   final double amount;
 
   DailyExpensePeriodAllocationModel({required this.amount});

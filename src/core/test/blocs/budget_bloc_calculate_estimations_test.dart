@@ -327,4 +327,3 @@ void calculateEstimationForMonthsAndForIncomes(
 
   expect(result, expected);
 }
-

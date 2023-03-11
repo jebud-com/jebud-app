@@ -1,4 +1,3 @@
-﻿
 import 'package:isar/isar.dart';
 
 extension StringExt on String {
@@ -16,11 +15,9 @@ extension StringExt on String {
 
     return hash;
   }
-  
 }
 
-
-abstract class HasIsarId  {
+abstract class HasIsarId {
   late Id id;
 
   HasIsarId() {
@@ -32,12 +29,11 @@ abstract class HasIsarId  {
 
   int getId() {
     String stringId = "";
-    for(Object obj in primaryKeyObjects) {
+    for (Object obj in primaryKeyObjects) {
       stringId += obj.toString();
     }
     return stringId.fastHash();
   }
-
 }
 
 abstract class MapsTo<T> {

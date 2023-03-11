@@ -1,4 +1,4 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:infrastructure/src/utils.dart';
 import 'package:isar/isar.dart';
 
@@ -12,7 +12,7 @@ class DailyExpenseModel extends HasIsarId implements MapsTo<DailyExpense> {
 
   DailyExpenseModel(
       {required this.amount, required this.day, required this.description});
-  
+
   @override
   DailyExpense toEntity() =>
       DailyExpense(amount: amount, day: day, description: description);
@@ -27,4 +27,3 @@ class DailyExpenseModel extends HasIsarId implements MapsTo<DailyExpense> {
   @override
   List<Object> get primaryKeyObjects => [amount, day, description];
 }
-

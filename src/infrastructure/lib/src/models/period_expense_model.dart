@@ -1,4 +1,4 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:infrastructure/src/utils.dart';
 import 'package:isar/isar.dart';
 
@@ -11,10 +11,11 @@ class PeriodExpenseModel extends HasIsarId implements MapsTo<PeriodExpense> {
   final DateTime applyUntil;
   final DateTime startingFrom;
 
-  PeriodExpenseModel({required this.amount,
-    required this.description,
-    required this.startingFrom,
-    required this.applyUntil});
+  PeriodExpenseModel(
+      {required this.amount,
+      required this.description,
+      required this.startingFrom,
+      required this.applyUntil});
 
   @ignore
   @override
@@ -31,7 +32,8 @@ class PeriodExpenseModel extends HasIsarId implements MapsTo<PeriodExpense> {
 
   factory PeriodExpenseModel.fromEntity(PeriodExpense periodExpense) =>
       PeriodExpenseModel(
-          amount: periodExpense.amount, description: periodExpense.description,
+          amount: periodExpense.amount,
+          description: periodExpense.description,
           startingFrom: periodExpense.startingFrom,
           applyUntil: periodExpense.applyUntil);
 }
