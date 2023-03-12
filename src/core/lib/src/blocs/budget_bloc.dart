@@ -341,6 +341,15 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
         .fold(0.0, (value, element) => value + element.amount);
     return dailyExpenseAllocation.amount - allExpensesOfCurrentMonth;
   }
+
+  List<DailyExpense> getDailyExpensesForDay(DateTime day) {
+    return dailyExpenses
+        .where((element) =>
+            element.day.day == day.day &&
+            element.day.month == day.month &&
+            element.day.year == day.year)
+        .toList();
+  }
 }
 
 class SetupBudgetDetails extends BudgetManagerBlocEvent {

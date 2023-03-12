@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:core/src/blocs/budget_bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
 import 'package:core/src/entities/daily_expense_period_allocation.dart';
@@ -162,5 +163,77 @@ void main() {
         expect(dailyLeft, equals(12.59));
       });
     });
+
+    test("daily Expense - get Daily Expenses of a specific day", () {
+      var fillerBudgetDetails = budgetDetails
+          .addDailyExpense(
+              amount: 15,
+              day: DateTime.parse("2023-01-02"),
+              description: 'just stuff')
+          .addDailyExpense(
+              amount: 20,
+              day: DateTime.parse("2023-01-05"),
+              description: "other stuff")
+          .addDailyExpense(
+              amount: 25,
+              day: DateTime.parse("2023-01-05"),
+              description: "other stuff same day")
+          .addDailyExpense(
+              amount: 50,
+              day: DateTime.parse("2022-12-25"),
+              description: "old stuff")
+          .addDailyExpense(
+              amount: 50,
+              day: DateTime.parse("2022-06-01"),
+              description: "future stuff");
+
+      var dailyExpensesForSpecificDay =
+          fillerBudgetDetails.getDailyExpensesForDay(DateTime.parse("2023-01-05"));
+
+      expect(
+          dailyExpensesForSpecificDay,
+          equals([
+            DailyExpense(
+                amount: 20,
+                day: DateTime.parse("2023-01-05"),
+                description: "other stuff"),
+            DailyExpense(
+                amount: 25,
+                day: DateTime.parse("2023-01-05"),
+                description: "other stuff same day")
+          ]));
+    });
+
+    test("daily Expense - get Daily Expenses of a specific day when no expense", () {
+      var fillerBudgetDetails = budgetDetails
+          .addDailyExpense(
+          amount: 15,
+          day: DateTime.parse("2023-01-02"),
+          description: 'just stuff')
+          .addDailyExpense(
+          amount: 20,
+          day: DateTime.parse("2023-01-05"),
+          description: "other stuff")
+          .addDailyExpense(
+          amount: 25,
+          day: DateTime.parse("2023-01-05"),
+          description: "other stuff same day")
+          .addDailyExpense(
+          amount: 50,
+          day: DateTime.parse("2022-12-25"),
+          description: "old stuff")
+          .addDailyExpense(
+          amount: 50,
+          day: DateTime.parse("2022-06-01"),
+          description: "future stuff");
+
+      var dailyExpensesForSpecificDay =
+      fillerBudgetDetails.getDailyExpensesForDay(DateTime.parse("2023-01-30"));
+
+      expect(
+          dailyExpensesForSpecificDay,
+          equals([]));
+    });
+    
   });
 }
