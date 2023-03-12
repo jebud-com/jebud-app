@@ -15,10 +15,11 @@ void main() {
     await Isar.initializeIsarCore(download: true);
   });
 
-  group("Add daily expense", () {
-    BudgetRepositoryImpl budgetRepository = BudgetRepositoryImpl("isar");
+  group("commands", () {
+    late BudgetRepositoryImpl budgetRepository;
 
     setUpAll(() async {
+      budgetRepository = BudgetRepositoryImpl("isar");
       await budgetRepository.init();
     });
 
@@ -63,8 +64,8 @@ void main() {
 
       var savedPeriodExpense = await isar.periodExpenseModels.get(
           (400.0.toString() +
-                  "somethingElse".toString() +
-                  DateTime.parse("2023-03-11").toString())
+              "somethingElse".toString() +
+              DateTime.parse("2023-03-11").toString())
               .fastHash());
 
       expect(savedPeriodExpense, isNotNull);
@@ -83,8 +84,8 @@ void main() {
 
       var savedPeriodExpense = await isar.periodExpenseModels.get(
           (400.0.toString() +
-                  "somethingElse".toString() +
-                  DateTime.parse("2023-03-11").toString())
+              "somethingElse".toString() +
+              DateTime.parse("2023-03-11").toString())
               .fastHash());
 
       expect(savedPeriodExpense, isNotNull);
@@ -120,6 +121,13 @@ void main() {
 
       expect(savedBudgetDetails, isNotNull);
       expect(savedBudgetDetails!.toEntity(), equals(budgetDetails));
+    });
+    
+    tearDown(() async {
+      var isar = Isar.getInstance('isar')!;
+      await isar.writeTxn(() async {
+        await isar.clear();
+      });
     });
   });
 

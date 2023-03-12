@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:infrastructure/src/models/budget_details_model.dart';
 import 'package:infrastructure/src/models/daily_expense_model.dart';
 import 'package:infrastructure/src/models/daily_expense_period_allocation_model.dart';
@@ -65,27 +66,36 @@ class BudgetRepositoryImpl implements BudgetRepository {
   }
 
   @override
-  Future getBudgetDetails() {
-    throw UnimplementedError();
+  Future<Either<Failure, BudgetDetails>> getBudgetDetails() async {
+    var budgetDetails =
+        await _isarInstance.budgetDetailsModels.where().findFirst();
+    if (budgetDetails == null) return Left(CannotFindBudgetDetails());
+    return Right((budgetDetails.toEntity()));
   }
 
   @override
-  Future<DailyExpensePeriodAllocation?> getDailyExpenseAllocation() {
-    throw UnimplementedError();
+  Future<DailyExpensePeriodAllocation?> getDailyExpenseAllocation() async {
+    return (await _isarInstance.dailyExpensePeriodAllocationModels
+            .where()
+            .findFirst())
+        ?.toEntity();
   }
 
   @override
-  Future<Iterable<DailyExpense>> getDailyExpenses() {
-    throw UnimplementedError();
+  Future<Iterable<DailyExpense>> getDailyExpenses() async {
+    return (await _isarInstance.dailyExpenseModels.where().findAll())
+        .map((e) => e.toEntity());
   }
 
   @override
-  Future<Iterable<PeriodExpense>> getPeriodExpenses() {
-    throw UnimplementedError();
+  Future<Iterable<PeriodExpense>> getPeriodExpenses() async {
+    return (await _isarInstance.periodExpenseModels.where().findAll())
+        .map((e) => e.toEntity());
   }
 
   @override
-  Future<Iterable<PeriodIncome>> getPeriodIncomes() {
-    throw UnimplementedError();
+  Future<Iterable<PeriodIncome>> getPeriodIncomes() async {
+    return (await _isarInstance.periodIncomeModels.where().findAll())
+        .map((e) => e.toEntity());
   }
 }

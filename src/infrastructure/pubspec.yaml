@@ -10,6 +10,7 @@ dependencies:
   isar: ^3.0.5
   core: 
     path: ../core/
+  dartz: ^0.10.1
   
 
 dev_dependencies:
