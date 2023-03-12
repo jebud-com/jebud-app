@@ -1,4 +1,4 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:infrastructure/src/budget_repository_impl.dart';
 import 'package:infrastructure/src/models/budget_details_model.dart';
 import 'package:infrastructure/src/models/daily_expense_model.dart';
@@ -64,8 +64,8 @@ void main() {
 
       var savedPeriodExpense = await isar.periodExpenseModels.get(
           (400.0.toString() +
-              "somethingElse".toString() +
-              DateTime.parse("2023-03-11").toString())
+                  "somethingElse".toString() +
+                  DateTime.parse("2023-03-11").toString())
               .fastHash());
 
       expect(savedPeriodExpense, isNotNull);
@@ -84,8 +84,8 @@ void main() {
 
       var savedPeriodExpense = await isar.periodExpenseModels.get(
           (400.0.toString() +
-              "somethingElse".toString() +
-              DateTime.parse("2023-03-11").toString())
+                  "somethingElse".toString() +
+                  DateTime.parse("2023-03-11").toString())
               .fastHash());
 
       expect(savedPeriodExpense, isNotNull);
@@ -122,7 +122,7 @@ void main() {
       expect(savedBudgetDetails, isNotNull);
       expect(savedBudgetDetails!.toEntity(), equals(budgetDetails));
     });
-    
+
     tearDown(() async {
       var isar = Isar.getInstance('isar')!;
       await isar.writeTxn(() async {

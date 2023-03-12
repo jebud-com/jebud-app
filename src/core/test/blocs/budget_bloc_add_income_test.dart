@@ -25,7 +25,6 @@ void main() {
     budgetBloc = BudgetManagerBloc(budgetRepository, dateTimeService);
   });
 
-
   blocTest<BudgetManagerBloc, BudgetManagerBlocState>(
       'Add first budget period income',
       build: () => budgetBloc,

@@ -18,4 +18,5 @@ export 'src/entities/period_income.dart' show PeriodIncome;
 export 'src/repository/budget_repository.dart' show BudgetRepository;
 
 export 'src/failures/failure.dart' show Failure;
-export 'src/failures/cannot_find_budget_details.dart' show CannotFindBudgetDetails;
+export 'src/failures/cannot_find_budget_details.dart'
+    show CannotFindBudgetDetails;

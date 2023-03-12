@@ -34,8 +34,7 @@ class BudgetManagerBloc
   void _initializeBudget(InitializeBudget event, Emitter emit) async {
     emit(InitializingBudget());
     var result = await _budgetRepository.getBudgetDetails();
-    await result.fold<Future>(
-        (l) async => emit(EmptyBudget()),
+    await result.fold<Future>((l) async => emit(EmptyBudget()),
         (r) async => await _buildAndEmitDetailedBudget(r, emit));
   }
 
