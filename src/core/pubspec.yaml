@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   bloc: ^8.1.1
+  dartz: ^0.10.1
   equatable: ^2.0.5 
 
 dev_dependencies:

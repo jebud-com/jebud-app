@@ -63,4 +63,29 @@ class BudgetRepositoryImpl implements BudgetRepository {
           .put(BudgetDetailsModel.fromEntity(budgetDetails));
     });
   }
+
+  @override
+  Future getBudgetDetails() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<DailyExpensePeriodAllocation?> getDailyExpenseAllocation() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Iterable<DailyExpense>> getDailyExpenses() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Iterable<PeriodExpense>> getPeriodExpenses() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Iterable<PeriodIncome>> getPeriodIncomes() {
+    throw UnimplementedError();
+  }
 }

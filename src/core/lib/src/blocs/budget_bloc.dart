@@ -23,11 +23,36 @@ class BudgetManagerBloc
 
   BudgetManagerBloc(this._budgetRepository, this._dateTimeService)
       : super(UninitializedBudget()) {
+    on<InitializeBudget>(_initializeBudget);
     on<SetupBudgetDetails>(_setupBudgetDetails);
     on<AddPeriodIncome>(_addPeriodIncome);
     on<AddPeriodExpense>(_addPeriodExpense);
     on<AddDailyExpenseAllocation>(_addDailyExpenseAllocation);
     on<AddDailyExpense>(_addDailyExpense);
+  }
+
+  void _initializeBudget(InitializeBudget event, Emitter emit) async {
+    emit(InitializingBudget());
+    var result = await _budgetRepository.getBudgetDetails();
+    await result.fold<Future>(
+        (l) async => emit(EmptyBudget()),
+        (r) async => await _buildAndEmitDetailedBudget(r, emit));
+  }
+
+  Future _buildAndEmitDetailedBudget(
+      BudgetDetails budgetDetails, Emitter emit) async {
+    var incomes = await _budgetRepository.getPeriodIncomes();
+    var expenses = await _budgetRepository.getPeriodExpenses();
+    var dailyExpenses = await _budgetRepository.getDailyExpenses();
+    var dailyExpenseAllocation =
+        await _budgetRepository.getDailyExpenseAllocation();
+
+    emit(DetailedBudget(
+        budgetDetails: budgetDetails,
+        incomes: incomes.toList(),
+        expenses: expenses.toList(),
+        dailyExpenses: dailyExpenses.toList(),
+        dailyExpenseAllocation: dailyExpenseAllocation));
   }
 
   void _setupBudgetDetails(SetupBudgetDetails event, Emitter emit) async {
@@ -99,6 +124,8 @@ class BudgetManagerBloc
 class UninitializedBudget extends BudgetManagerBlocState {}
 
 class InitializingBudget extends BudgetManagerBlocState {}
+
+class EmptyBudget extends BudgetManagerBlocState {}
 
 class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   final BudgetDetails budgetDetails;
@@ -357,3 +384,5 @@ class AddDailyExpense extends BudgetManagerBlocEvent {
 
   AddDailyExpense({required this.amount, required this.description});
 }
+
+class InitializeBudget extends BudgetManagerBlocEvent {}
