@@ -1,8 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:jebud_app/pages/home_page.dart';
 
 class InitiationPage extends StatefulWidget {
+  static const String name = "/init";
   const InitiationPage({super.key});
 
   @override
@@ -10,26 +14,37 @@ class InitiationPage extends StatefulWidget {
 }
 
 class _InitiationPageState extends State<InitiationPage> {
+  final TextEditingController _startingBudgetTextController =
+      TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarColor: Theme.of(context).colorScheme.secondary,
-          ),
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-        ),
-        extendBodyBehindAppBar: true,
-        body: Padding(
-            padding: const EdgeInsets.all(32),
-            child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+    return BlocListener(
+        bloc: BlocProvider.of<BudgetManagerBloc>(context),
+        listener: (context, state) {
+          if (state is DetailedBudget) {
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil(MyHomePage.name, (_) => false);
+          }
+        },
+        child: Scaffold(
+            appBar: AppBar(
+              systemOverlayStyle: SystemUiOverlayStyle(
+                statusBarColor: Theme.of(context).colorScheme.secondary,
+              ),
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+            ),
+            extendBodyBehindAppBar: true,
+            body: Padding(
+                padding: const EdgeInsets.all(32),
+                child: SingleChildScrollView(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                       const SizedBox.square(dimension: 64),
                       Image.asset("assets/png/app_name_slogan.png",
                           height: 130, fit: BoxFit.contain),
@@ -41,6 +56,7 @@ class _InitiationPageState extends State<InitiationPage> {
                       ),
                       const SizedBox.square(dimension: 16),
                       TextFormField(
+                          controller: _startingBudgetTextController,
                           textInputAction: TextInputAction.go,
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(
@@ -54,11 +70,17 @@ class _InitiationPageState extends State<InitiationPage> {
                               suffix: Text("€"))),
                       const SizedBox.square(dimension: 32),
                       ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: _addStartingBudget,
                         label: const Text("Let's get started!"),
                         icon: const Icon(Icons.arrow_forward),
                       ),
                       const SizedBox.square(dimension: 32),
-                    ]))));
+                    ])))));
+  }
+
+  void _addStartingBudget() {
+    BlocProvider.of<BudgetManagerBloc>(context).add(SetupBudgetDetails(
+        startingAmount:
+            double.parse(_startingBudgetTextController.text.trim())));
   }
 }
