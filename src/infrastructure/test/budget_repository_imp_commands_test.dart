@@ -11,6 +11,7 @@ import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 void main() {
+  const String connectionString = "queries";
   setUpAll(() async {
     await Isar.initializeIsarCore(download: true);
   });
@@ -19,7 +20,7 @@ void main() {
     late BudgetRepositoryImpl budgetRepository;
 
     setUpAll(() async {
-      budgetRepository = BudgetRepositoryImpl("isar");
+      budgetRepository = BudgetRepositoryImpl(connectionString);
       await budgetRepository.init();
     });
 
@@ -31,7 +32,7 @@ void main() {
     });
 
     test('budget details is retrieved', () async {
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
         isar.budgetDetailsModels.put(BudgetDetailsModel(
@@ -54,7 +55,7 @@ void main() {
     });
 
     test('daily expense allocation is retrieved', () async {
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
         isar.dailyExpensePeriodAllocationModels
@@ -73,7 +74,7 @@ void main() {
     });
 
     test('incomes are retrieved', () async {
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
         isar.periodIncomeModels
@@ -97,7 +98,7 @@ void main() {
     });
 
     test('expenses are retrieved', () async {
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
         isar.periodExpenseModels.put(PeriodExpenseModel(
@@ -134,7 +135,7 @@ void main() {
     });
 
     test("daily expenses are retrieved", () async {
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
         isar.dailyExpenseModels.put(DailyExpenseModel(
@@ -165,7 +166,7 @@ void main() {
     });
 
     tearDown(() async {
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
       await isar.writeTxn(() async {
         await isar.clear();
       });
@@ -173,6 +174,6 @@ void main() {
   });
 
   tearDownAll(() async {
-    await Isar.getInstance("isar")!.close(deleteFromDisk: true);
+    await Isar.getInstance(connectionString)!.close(deleteFromDisk: true);
   });
 }

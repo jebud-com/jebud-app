@@ -11,6 +11,7 @@ import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 void main() {
+  const String connectionString = "commands";
   setUpAll(() async {
     await Isar.initializeIsarCore(download: true);
   });
@@ -19,7 +20,7 @@ void main() {
     late BudgetRepositoryImpl budgetRepository;
 
     setUpAll(() async {
-      budgetRepository = BudgetRepositoryImpl("isar");
+      budgetRepository = BudgetRepositoryImpl(connectionString);
       await budgetRepository.init();
     });
 
@@ -28,7 +29,7 @@ void main() {
           amount: 300, day: DateTime.parse("2023-01-01"), description: "pizza");
       await budgetRepository.addDailyExpense(dailyExpense);
 
-      var isar = Isar.getInstance("isar")!;
+      var isar = Isar.getInstance(connectionString)!;
 
       var savedDailyExpense = await isar.dailyExpenseModels.get(
           ("${300.0.toString()}${DateTime.parse("2023-01-01").toString()}pizza")
@@ -42,7 +43,7 @@ void main() {
       final dailyExpenseAllocation = DailyExpensePeriodAllocation(amount: 400);
       await budgetRepository.addDailyExpenseAllocation(dailyExpenseAllocation);
 
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       var savedDailyExpenseAllocation = await isar
           .dailyExpensePeriodAllocationModels
@@ -60,7 +61,7 @@ void main() {
           startingFrom: DateTime.parse("2023-03-11"));
       await budgetRepository.addPeriodExpense(periodExpense);
 
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       var savedPeriodExpense = await isar.periodExpenseModels.get(
           (400.0.toString() +
@@ -80,7 +81,7 @@ void main() {
           applyUntil: DateTime.parse("2023-05-11"));
       await budgetRepository.addPeriodExpense(periodExpense);
 
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       var savedPeriodExpense = await isar.periodExpenseModels.get(
           (400.0.toString() +
@@ -99,7 +100,7 @@ void main() {
       );
       await budgetRepository.addPeriodIncome(periodIncome);
 
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       var savedPeriodIncome = await isar.periodIncomeModels
           .get((400.0.toString() + "somethingElse".toString()).fastHash());
@@ -113,7 +114,7 @@ void main() {
           startingAmount: 300, startingMonth: DateTime.parse("2023-03-01"));
       await budgetRepository.saveBudgetDetails(budgetDetails);
 
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
 
       var savedBudgetDetails = await isar.budgetDetailsModels.get(
           (300.0.toString() + DateTime.parse("2023-03-01").toString())
@@ -124,7 +125,7 @@ void main() {
     });
 
     tearDown(() async {
-      var isar = Isar.getInstance('isar')!;
+      var isar = Isar.getInstance(connectionString)!;
       await isar.writeTxn(() async {
         await isar.clear();
       });
@@ -132,6 +133,6 @@ void main() {
   });
 
   tearDownAll(() async {
-    await Isar.getInstance("isar")!.close(deleteFromDisk: true);
+    await Isar.getInstance(connectionString)!.close(deleteFromDisk: true);
   });
 }
