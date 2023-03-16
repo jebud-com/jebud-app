@@ -6,15 +6,16 @@ class BudgetText extends Text {
 
   BudgetText(
       {super.key,
+      required double orangeBoundary,
       required this.nbrFormatter,
       required double budget,
       required double fontSize})
       : super(nbrFormatter.format(budget),
             style: TextStyle(
                 fontSize: fontSize,
-                color: budget >= 0 && budget < 500
+                color: budget >= 0 && budget < orangeBoundary
                     ? Colors.orange
-                    : budget > 500
+                    : budget > orangeBoundary
                         ? Colors.green
                         : Colors.red,
                 fontWeight: FontWeight.w700));

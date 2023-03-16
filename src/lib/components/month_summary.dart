@@ -55,9 +55,10 @@ class _MonthSummaryState extends State<MonthSummary> {
                                     style: TextStyle(fontSize: 18)),
                                 Center(
                                     child: BudgetText(
+                                  orangeBoundary: 500,
                                   nbrFormatter: currencyFormatter,
-                                  budget: detailedBudget
-                                      .estimateSavingsUpTo(DateTime.now()),
+                                  budget: detailedBudget.estimateSavingsUpTo(
+                                      DateTime.now().copyWith(day: 1)),
                                   fontSize: 32,
                                 )),
                               ],
@@ -69,76 +70,88 @@ class _MonthSummaryState extends State<MonthSummary> {
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox.square(dimension: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                              child: Card(
-                                  child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          const Text("This month",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 14)),
-                                          Center(
-                                              child: BudgetText(
-                                            nbrFormatter:
-                                                compactCurrencyFormatter,
-                                            budget: detailedBudget
-                                                .getLeftDailyExpenseForRunningMonth(
-                                                    DateTime.now()),
-                                            fontSize: 26,
-                                          ))
-                                        ],
-                                      )))),
-                          Expanded(
-                              child: Card(
-                                  child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          const Text("This week",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 14)),
-                                          Center(
-                                              child: BudgetText(
-                                            nbrFormatter:
-                                                compactCurrencyFormatter,
-                                            budget: detailedBudget
-                                                .getLeftDailyExpenseForRunningWeek(
-                                                    DateTime.now()),
-                                            fontSize: 26,
-                                          ))
-                                        ],
-                                      )))),
-                          Expanded(
-                              child: Card(
-                                  child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          const Text("Today",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 14)),
-                                          Center(
-                                              child: BudgetText(
-                                            nbrFormatter:
-                                                compactCurrencyFormatter,
-                                            budget: detailedBudget
-                                                .getLeftDailyExpenseForRunningDay(
-                                                    DateTime.now()),
-                                            fontSize: 26,
-                                          ))
-                                        ],
-                                      )))),
-                        ],
+                      SizedBox(
+                        height: 85,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                                child: Card(
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            const Text("This month",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 14)),
+                                            Center(
+                                                child: FittedBox(
+                                                    fit: BoxFit.fitWidth,
+                                                    child: BudgetText(
+                                                      orangeBoundary: 100,
+                                                      nbrFormatter:
+                                                          compactCurrencyFormatter,
+                                                      budget: detailedBudget
+                                                          .getLeftDailyExpenseForRunningMonth(
+                                                              DateTime.now()),
+                                                      fontSize: 26,
+                                                    )))
+                                          ],
+                                        )))),
+                            Expanded(
+                                child: Card(
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            const Text("This week",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 14)),
+                                            Center(
+                                                child: FittedBox(
+                                                    fit: BoxFit.fitWidth,
+                                                    child: BudgetText(
+                                                      orangeBoundary: 50,
+                                                      nbrFormatter:
+                                                          compactCurrencyFormatter,
+                                                      budget: detailedBudget
+                                                          .getLeftDailyExpenseForRunningWeek(
+                                                              DateTime.now()),
+                                                      fontSize: 26,
+                                                    )))
+                                          ],
+                                        )))),
+                            Expanded(
+                                child: Card(
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            const Text("Today",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 14)),
+                                            Center(
+                                                child: FittedBox(
+                                                    fit: BoxFit.fitWidth,
+                                                    child: BudgetText(
+                                                      orangeBoundary: 10,
+                                                      nbrFormatter:
+                                                          compactCurrencyFormatter,
+                                                      budget: detailedBudget
+                                                          .getLeftDailyExpenseForRunningDay(
+                                                              DateTime.now()),
+                                                      fontSize: 26,
+                                                    )))
+                                          ],
+                                        )))),
+                          ],
+                        ),
                       ),
                       const SizedBox.square(dimension: 16),
                       SummaryList(
@@ -225,8 +238,8 @@ class _MonthSummaryState extends State<MonthSummary> {
                                       Text(compactCurrencyFormatter.format(
                                           state.estimateSavingsUpTo(
                                               DateTime.now().copyWith(
-                                                  month: DateTime.now().month +
-                                                      12))))
+                                                  year: DateTime.now().year +
+                                                      1))))
                                     ])),
                               ],
                             )),
