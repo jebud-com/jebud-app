@@ -235,7 +235,8 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
     final allEarlierExpenses = dailyExpenses
         .where((element) =>
             element.day.month < targetMonth.month &&
-            element.day.year <= targetMonth.year)
+                element.day.year == targetMonth.year ||
+            element.day.year < targetMonth.year)
         .fold(0.0, (value, element) => value + element.amount);
 
     return result -

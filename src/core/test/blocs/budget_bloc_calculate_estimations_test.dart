@@ -227,6 +227,26 @@ void main() {
     expect(result, 150);
   });
 
+
+  test(
+      "Calculate estimation for current month next year with a daily expense allocation when monthly expense is under control",
+          () {
+        var detailedBudget = DetailedBudget(
+            budgetDetails: BudgetDetails(
+                startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+            incomes: [],
+            dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+            expenses: []);
+
+        detailedBudget = detailedBudget.addDailyExpense(
+            description: "stuff", amount: 100, day: DateTime.parse("2023-03-10"));
+
+        var result =
+        detailedBudget.estimateSavingsUpTo(DateTime.parse("2024-03-01"));
+
+        expect(result, -850);
+      });
+
   test(
       "Calculate estimation for current month with a daily expense allocation when monthly expense surpasses allocation",
       () {
