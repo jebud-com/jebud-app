@@ -8,7 +8,12 @@ void main() {
     var budgetDetails = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: 500, startingMonth: DateTime.parse("2023-01-01")),
-        incomes: [PeriodIncome(amount: 2500, description: 'salary', startingFrom: DateTime.parse("2023-01-01"))],
+        incomes: [
+          PeriodIncome(
+              amount: 2500,
+              description: 'salary',
+              startingFrom: DateTime.parse("2023-01-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 400),
         expenses: [
           PeriodExpense(

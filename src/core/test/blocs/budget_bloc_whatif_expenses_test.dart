@@ -1,4 +1,4 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:core/src/projections.dart';
 import 'package:test/test.dart';
 
@@ -11,7 +11,10 @@ void main() {
           budgetDetails: BudgetDetails(
               startingAmount: 500, startingMonth: DateTime.parse("2023-03-01")),
           incomes: [
-            PeriodIncome(amount: 300, description: '', startingFrom: DateTime.parse("2023-03-01"))
+            PeriodIncome(
+                amount: 300,
+                description: '',
+                startingFrom: DateTime.parse("2023-03-01"))
           ],
           expenses: [
             PeriodExpense(
