@@ -43,8 +43,7 @@ class _SettingsWidget extends State<Settings> {
           state as DetailedBudget;
           if (!state.isAddingDailyExpenseAllocation) {
             FocusManager.instance.primaryFocus?.unfocus();
-            setState(() {
-            });
+            setState(() {});
           }
         },
         bloc: BlocProvider.of<BudgetManagerBloc>(context),

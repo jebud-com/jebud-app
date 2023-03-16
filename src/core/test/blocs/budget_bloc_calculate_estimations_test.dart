@@ -103,25 +103,24 @@ void main() {
         expected: 400 + 399 - 200);
   });
 
-
   test(
       'Calculate estimation with single income for 1 month and single monthly interminable expense starting half of the month should ignore Time component',
-          () {
-        var startingMonth = DateTime.parse("2023-03-01");
-        var halfOfStartingMonth = DateTime.parse("2023-03-15T20:13:00");
-        calculateEstimationForMonthsAndForIncomes(
-            startingAmount: 400,
-            startingMonth: startingMonth,
-            targetMonth: startingMonth,
-            incomes: [PeriodIncome(amount: 399, description: '')],
-            expenses: [
-              PeriodExpense(
-                  amount: 200,
-                  description: 'netflix',
-                  startingFrom: halfOfStartingMonth)
-            ],
-            expected: 400 + 399 - 200);
-      });
+      () {
+    var startingMonth = DateTime.parse("2023-03-01");
+    var halfOfStartingMonth = DateTime.parse("2023-03-15T20:13:00");
+    calculateEstimationForMonthsAndForIncomes(
+        startingAmount: 400,
+        startingMonth: startingMonth,
+        targetMonth: startingMonth,
+        incomes: [PeriodIncome(amount: 399, description: '')],
+        expenses: [
+          PeriodExpense(
+              amount: 200,
+              description: 'netflix',
+              startingFrom: halfOfStartingMonth)
+        ],
+        expected: 400 + 399 - 200);
+  });
 
   test(
       'Calculate estimation with single income for 3 month and single monthly interminable expense',
@@ -227,25 +226,24 @@ void main() {
     expect(result, 150);
   });
 
-
   test(
       "Calculate estimation for current month next year with a daily expense allocation when monthly expense is under control",
-          () {
-        var detailedBudget = DetailedBudget(
-            budgetDetails: BudgetDetails(
-                startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-            incomes: [],
-            dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
-            expenses: []);
+      () {
+    var detailedBudget = DetailedBudget(
+        budgetDetails: BudgetDetails(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
+        incomes: [],
+        dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
+        expenses: []);
 
-        detailedBudget = detailedBudget.addDailyExpense(
-            description: "stuff", amount: 100, day: DateTime.parse("2023-03-10"));
+    detailedBudget = detailedBudget.addDailyExpense(
+        description: "stuff", amount: 100, day: DateTime.parse("2023-03-10"));
 
-        var result =
+    var result =
         detailedBudget.estimateSavingsUpTo(DateTime.parse("2024-03-01"));
 
-        expect(result, -850);
-      });
+    expect(result, -850);
+  });
 
   test(
       "Calculate estimation for current month with a daily expense allocation when monthly expense surpasses allocation",
