@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jebud_app/components/add_budget_element.dart';
+import 'package:jebud_app/components/settings.dart';
 
 import '../components/month_summary.dart';
 
@@ -59,16 +61,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         },
       ),
       body: TabBarView(
+        physics: const NeverScrollableScrollPhysics(),
         controller: _tabController,
         children: const [MonthSummary(), Text("")],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          showModalBottomSheet(
-              context: context, builder: (_) => Container(), enableDrag: true);
-        },
-      ),
+      floatingActionButton: _tabController.index == 0
+          ? FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () {
+                showModalBottomSheet(
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (context) => const AddBudgetElement(),
+                    enableDrag: true,
+                    useSafeArea: true);
+              },
+            )
+          : null,
     );
   }
 }
