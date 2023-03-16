@@ -69,8 +69,12 @@ class BudgetManagerBloc
     emit(DetailedBudget.copyFromWith(state as DetailedBudget,
         isAddingIncome: true));
 
-    final income =
-        PeriodIncome(amount: event.amount, description: event.description);
+    final income = PeriodIncome(
+        amount: event.amount,
+        description: event.description,
+        startingFrom: event.startingFrom,
+        applyUntil: event.applyUntil);
+
     await _budgetRepository.addPeriodIncome(income);
 
     final currentDetailedBudget = (state as DetailedBudget);
@@ -214,13 +218,27 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
     double result = budgetDetails.startingAmount;
     var startMonth = budgetDetails.startingMonth;
 
-    final totalIncomes =
-        incomes.fold(0.0, (value, element) => value + element.amount);
+    // final totalIncomes =
+    //     incomes.fold(0.0, (value, element) => value + element.amount);
 
     for (int i = 0; i < _numberOfMonthsToTargetMonth(targetMonth); i++) {
       final currentMonth =
           DateTime(startMonth.year, startMonth.month + i, startMonth.day);
-      result = result + totalIncomes;
+      result = result +
+          incomes
+              .where((income) =>
+                  (income.startingFrom
+                          .getFirstOfMonthAtMidnight()
+                          .isBefore(currentMonth) &&
+                      income.applyUntil.isAfter(currentMonth)) ||
+                  income.startingFrom
+                      .getFirstOfMonthAtMidnight()
+                      .isAtSameMomentAs(currentMonth) ||
+                  income.applyUntil
+                      .getFirstOfMonthAtMidnight()
+                      .isAtSameMomentAs(currentMonth))
+              .fold(0.0,
+                  (previousValue, element) => previousValue + element.amount);
       result = result - _expensesFor(currentMonth);
     }
 
@@ -426,10 +444,16 @@ class SetupBudgetDetails extends BudgetManagerBlocEvent {
 
 class AddPeriodIncome extends BudgetManagerBlocEvent {
   final double amount;
+  final DateTime startingFrom;
+  final DateTime? applyUntil;
 
   final String description;
 
-  AddPeriodIncome({required this.amount, required this.description});
+  AddPeriodIncome(
+      {required this.amount,
+      required this.description,
+      required this.startingFrom,
+      this.applyUntil});
 }
 
 class AddPeriodExpense extends BudgetManagerBlocEvent {

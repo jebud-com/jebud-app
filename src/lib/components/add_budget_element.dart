@@ -279,8 +279,17 @@ class AddIncome extends StatefulWidget {
 }
 
 class _AddIncomeState extends State<AddIncome> with TickerProviderStateMixin {
-  final _amountTextController = TextEditingController();
-  final _descriptionTextController = TextEditingController();
+  final TextEditingController _startDateTextController =
+      TextEditingController();
+  final TextEditingController _endDateTextController = TextEditingController();
+  final TextEditingController _amountTextController = TextEditingController();
+  final TextEditingController _descriptionTextController =
+      TextEditingController();
+
+  Set<int> selectedType = {0};
+  DateTime startDate = DateTime.now();
+  DateTime endDate = DateTime.now();
+  bool hasEndDate = false;
 
   bool get canConfirm {
     return _amountTextController.text.trim().isNotEmpty &&
@@ -288,8 +297,94 @@ class _AddIncomeState extends State<AddIncome> with TickerProviderStateMixin {
   }
 
   @override
+  void initState() {
+    _startDateTextController.text = DateFormat.yMMMEd().format(startDate);
+    _endDateTextController.text = DateFormat.yMMMEd().format(endDate);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const SizedBox.square(
+        dimension: 24,
+      ),
+      GestureDetector(
+          onTap: () async {
+            var selectedStartDate = await showDatePicker(
+                context: context,
+                firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
+                initialDate: DateTime.now(),
+                lastDate: DateTime(275760, 09, 13));
+            if (selectedStartDate != null) {
+              setState(() {
+                startDate = selectedStartDate;
+                _startDateTextController.text =
+                    DateFormat.yMMMEd().format(startDate);
+                if (startDate.isAfter(endDate)) {
+                  endDate = startDate;
+                  _endDateTextController.text =
+                      DateFormat.yMMMEd().format(endDate);
+                }
+              });
+            }
+          },
+          child: TextFormField(
+              enabled: false,
+              controller: _startDateTextController,
+              textInputAction: TextInputAction.go,
+              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(
+                label: Text("Start date"),
+                disabledBorder: OutlineInputBorder(),
+                border: OutlineInputBorder(),
+              ))),
+      const SizedBox.square(
+        dimension: 8,
+      ),
+      Flexible(
+          child: CheckboxListTile(
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const Text("Has an end date"),
+              value: hasEndDate,
+              onChanged: (newValue) {
+                setState(() {
+                  hasEndDate = newValue!;
+                });
+              })),
+      const SizedBox.square(
+        dimension: 8,
+      ),
+      if (hasEndDate) ...[
+        GestureDetector(
+            onTap: () async {
+              var selectedEndDate = await showDatePicker(
+                  context: context,
+                  firstDate: startDate,
+                  initialDate: endDate,
+                  lastDate: DateTime(275760, 09, 13));
+              if (selectedEndDate != null) {
+                setState(() {
+                  endDate = selectedEndDate;
+                  _endDateTextController.text =
+                      DateFormat.yMMMEd().format(endDate);
+                });
+              }
+            },
+            child: TextFormField(
+                enabled: false,
+                controller: _endDateTextController,
+                textInputAction: TextInputAction.go,
+                keyboardType: TextInputType.text,
+                decoration: const InputDecoration(
+                  label: Text("End date"),
+                  disabledBorder: OutlineInputBorder(),
+                  border: OutlineInputBorder(),
+                ))),
+        const SizedBox.square(
+          dimension: 16,
+        ),
+      ],
       TextFormField(
           controller: _amountTextController,
           textInputAction: TextInputAction.next,
@@ -327,6 +422,8 @@ class _AddIncomeState extends State<AddIncome> with TickerProviderStateMixin {
     if (!canConfirm) return;
 
     BlocProvider.of<BudgetManagerBloc>(context).add(AddPeriodIncome(
+        startingFrom: startDate,
+        applyUntil: hasEndDate ? endDate : null,
         amount: double.parse(_amountTextController.text.trim()),
         description: _descriptionTextController.text.trim()));
   }

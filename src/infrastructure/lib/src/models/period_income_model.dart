@@ -8,18 +8,32 @@ part 'period_income_model.g.dart';
 class PeriodIncomeModel extends HasIsarId implements MapsTo<PeriodIncome> {
   final double amount;
   final String description;
+  final DateTime startingFrom;
+  final DateTime applyUntil;
 
-  PeriodIncomeModel({required this.amount, required this.description});
+  PeriodIncomeModel(
+      {required this.amount,
+      required this.applyUntil,
+      required this.description,
+      required this.startingFrom});
 
   @ignore
   @override
-  List<Object> get primaryKeyObjects => [amount, description];
+  List<Object> get primaryKeyObjects => [amount, description, startingFrom];
 
   @override
   PeriodIncome toEntity() {
-    return PeriodIncome(amount: amount, description: description);
+    return PeriodIncome(
+        amount: amount,
+        description: description,
+        startingFrom: startingFrom,
+        applyUntil: applyUntil);
   }
 
   factory PeriodIncomeModel.fromEntity(PeriodIncome income) =>
-      PeriodIncomeModel(amount: income.amount, description: income.description);
+      PeriodIncomeModel(
+          amount: income.amount,
+          description: income.description,
+          startingFrom: income.startingFrom,
+          applyUntil: income.applyUntil);
 }

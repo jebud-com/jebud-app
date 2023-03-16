@@ -77,17 +77,31 @@ void main() {
       var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
-        isar.periodIncomeModels
-            .put(PeriodIncomeModel(amount: 100, description: "something"));
-        isar.periodIncomeModels
-            .put(PeriodIncomeModel(amount: 500, description: "something else"));
+        isar.periodIncomeModels.put(PeriodIncomeModel(
+            amount: 100,
+            description: "something",
+            startingFrom: DateTime.parse("2023-01-03"),
+            applyUntil: DateTime.parse("2023-10-04")));
+        isar.periodIncomeModels.put(PeriodIncomeModel(
+            amount: 500,
+            description: "something else",
+            startingFrom: DateTime.parse("2023-06-01"),
+            applyUntil: DateTime.parse("2023-10-04")));
       });
 
       var result = await budgetRepository.getPeriodIncomes();
 
       expect(result, <PeriodIncome>[
-        PeriodIncome(amount: 100, description: "something"),
-        PeriodIncome(amount: 500, description: "something else"),
+        PeriodIncome(
+            amount: 100,
+            description: "something",
+            startingFrom: DateTime.parse("2023-01-03"),
+            applyUntil: DateTime.parse("2023-10-04")),
+        PeriodIncome(
+            amount: 500,
+            description: "something else",
+            startingFrom: DateTime.parse("2023-06-01"),
+            applyUntil: DateTime.parse("2023-10-04")),
       ]);
     });
 

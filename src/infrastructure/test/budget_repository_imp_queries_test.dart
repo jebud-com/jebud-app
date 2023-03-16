@@ -114,20 +114,45 @@ void main() {
       expect(savedPeriodExpense!.toEntity(), equals(periodExpense));
     });
 
-    test("period income is saved", () async {
-      final periodIncome = PeriodIncome(
-        amount: 400,
-        description: "somethingElse",
-      );
-      await budgetRepository.addPeriodIncome(periodIncome);
+    group("period income is saved", () {
+      test("period income is saved", () async {
+        final periodIncome = PeriodIncome(
+            amount: 400,
+            description: "somethingElse",
+            startingFrom: DateTime.parse("2023-01-23"));
+        await budgetRepository.addPeriodIncome(periodIncome);
 
-      var isar = Isar.getInstance(connectionString)!;
+        var isar = Isar.getInstance(connectionString)!;
 
-      var savedPeriodIncome = await isar.periodIncomeModels
-          .get((400.0.toString() + "somethingElse".toString()).fastHash());
+        var savedPeriodIncome = await isar.periodIncomeModels.get(
+            (400.0.toString() +
+                    "somethingElse".toString() +
+                    DateTime.parse("2023-01-23").toString())
+                .fastHash());
 
-      expect(savedPeriodIncome, isNotNull);
-      expect(savedPeriodIncome!.toEntity(), equals(periodIncome));
+        expect(savedPeriodIncome, isNotNull);
+        expect(savedPeriodIncome!.toEntity(), equals(periodIncome));
+      });
+
+      test("period income is saved with end date", () async {
+        final periodIncome = PeriodIncome(
+            amount: 400,
+            description: "withEnd",
+            startingFrom: DateTime.parse("2023-01-23"),
+            applyUntil: DateTime.parse("2023-06-23"));
+        await budgetRepository.addPeriodIncome(periodIncome);
+
+        var isar = Isar.getInstance(connectionString)!;
+
+        var savedPeriodIncome = await isar.periodIncomeModels.get(
+            (400.0.toString() +
+                    "withEnd".toString() +
+                    DateTime.parse("2023-01-23").toString())
+                .fastHash());
+
+        expect(savedPeriodIncome, isNotNull);
+        expect(savedPeriodIncome!.toEntity(), equals(periodIncome));
+      });
     });
 
     test("budget details is saved", () async {

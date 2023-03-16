@@ -28,7 +28,12 @@ void main() {
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: startingMonth,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expected: 500 + 399);
   });
 
@@ -39,7 +44,12 @@ void main() {
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expected: 500 + 399 + 399 + 399);
   });
 
@@ -50,7 +60,12 @@ void main() {
         startingAmount: 500,
         startingMonth: startingMonth,
         targetMonth: sixteenMonthsLater,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expected: 500 + 399 * 16);
   });
 
@@ -62,10 +77,101 @@ void main() {
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
         incomes: [
-          PeriodIncome(amount: 399, description: ''),
-          PeriodIncome(amount: 200, description: '')
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01")),
+          PeriodIncome(
+              amount: 200,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
         ],
         expected: 500 + 399 * 3 + 200 * 3);
+  });
+
+  test("When Period Income is in the future and estimating before it beings",
+      () {
+    var startingMonth = DateTime.parse("2023-03-01");
+    var threeMonthsLater = DateTime.parse("2023-05-01");
+    calculateEstimationForMonthsAndForIncomes(
+        startingAmount: 500,
+        startingMonth: startingMonth,
+        targetMonth: startingMonth,
+        incomes: [
+          PeriodIncome(
+              amount: 399, description: '', startingFrom: threeMonthsLater),
+        ],
+        expected: 500);
+  });
+
+  test(
+      "When Period Income is in the future and estimating during same month it begins",
+      () {
+    var startingMonth = DateTime.parse("2023-03-01");
+    var threeMonthsLater = DateTime.parse("2023-05-05");
+    calculateEstimationForMonthsAndForIncomes(
+        startingAmount: 500,
+        startingMonth: startingMonth,
+        targetMonth: DateTime.parse("2023-05-01"),
+        incomes: [
+          PeriodIncome(
+              amount: 399, description: '', startingFrom: threeMonthsLater),
+        ],
+        expected: 500 + 399);
+  });
+
+  test(
+      "When Period Income is in the future and estimating during same month it begins",
+      () {
+    var startingMonth = DateTime.parse("2023-03-01");
+    var threeMonthsLater = DateTime.parse("2023-05-05");
+    calculateEstimationForMonthsAndForIncomes(
+        startingAmount: 500,
+        startingMonth: startingMonth,
+        targetMonth: DateTime.parse("2023-05-15"),
+        incomes: [
+          PeriodIncome(
+              amount: 399, description: '', startingFrom: threeMonthsLater),
+        ],
+        expected: 500 + 399);
+  });
+
+  test(
+      "When Period Income is in the future and estimating during three months it begins",
+      () {
+    var startingMonth = DateTime.parse("2023-03-01");
+    var threeMonthsLater = DateTime.parse("2023-05-05");
+    var sixMonthsLater = DateTime.parse("2023-07-01");
+    calculateEstimationForMonthsAndForIncomes(
+        startingAmount: 500,
+        startingMonth: startingMonth,
+        targetMonth: sixMonthsLater,
+        incomes: [
+          PeriodIncome(
+              amount: 399, description: '', startingFrom: threeMonthsLater),
+        ],
+        expected: 500 + 399 * 3);
+  });
+
+  test(
+      "When 3 months Period Income is in the future and estimating during one months after it ends",
+      () {
+    var startingMonth = DateTime.parse("2023-03-01");
+    var threeMonthsLater = DateTime.parse("2023-05-05");
+    var sixMonthsLater = DateTime.parse("2023-07-01");
+    var sevenMonthsLater = DateTime.parse("2023-08-01");
+    calculateEstimationForMonthsAndForIncomes(
+        startingAmount: 500,
+        startingMonth: startingMonth,
+        targetMonth: sevenMonthsLater,
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: threeMonthsLater,
+              applyUntil: sixMonthsLater),
+        ],
+        expected: 500 + 399 * 3);
   });
 
   test(
@@ -76,7 +182,12 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: startingMonth,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expenses: [
           PeriodExpense(
               amount: 200, description: 'netflix', startingFrom: startingMonth)
@@ -93,7 +204,12 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: startingMonth,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expenses: [
           PeriodExpense(
               amount: 200,
@@ -112,7 +228,12 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: startingMonth,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expenses: [
           PeriodExpense(
               amount: 200,
@@ -131,7 +252,12 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expenses: [
           PeriodExpense(
               amount: 200, startingFrom: startingMonth, description: '')
@@ -150,7 +276,10 @@ void main() {
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
         incomes: [
-          PeriodIncome(amount: 399, description: ''),
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01")),
         ],
         expenses: [
           PeriodExpense(
@@ -171,7 +300,12 @@ void main() {
         startingAmount: 400,
         startingMonth: startingMonth,
         targetMonth: threeMonthsLater,
-        incomes: [PeriodIncome(amount: 399, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 399,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         expenses: [
           PeriodExpense(
               amount: 200, startingFrom: startingMonth, description: ''),
@@ -188,7 +322,12 @@ void main() {
     final detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-        incomes: [PeriodIncome(amount: 1000, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 1000,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
@@ -208,7 +347,12 @@ void main() {
     var detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-        incomes: [PeriodIncome(amount: 1000, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 1000,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
@@ -251,7 +395,12 @@ void main() {
     var detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-        incomes: [PeriodIncome(amount: 1000, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 1000,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
@@ -275,7 +424,12 @@ void main() {
     var detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-        incomes: [PeriodIncome(amount: 1000, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 1000,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
@@ -299,7 +453,12 @@ void main() {
     var detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-        incomes: [PeriodIncome(amount: 1000, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 1000,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
@@ -323,7 +482,12 @@ void main() {
     var detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-        incomes: [PeriodIncome(amount: 1000, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 1000,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(
@@ -346,7 +510,12 @@ void main() {
     var detailedBudget = DetailedBudget(
         budgetDetails: BudgetDetails(
             startingAmount: -500, startingMonth: DateTime.parse("2023-03-01")),
-        incomes: [PeriodIncome(amount: 1000, description: '')],
+        incomes: [
+          PeriodIncome(
+              amount: 1000,
+              description: '',
+              startingFrom: DateTime.parse("2023-03-01"))
+        ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 250),
         expenses: [
           PeriodExpense(

@@ -22,10 +22,20 @@ const PeriodIncomeModelSchema = CollectionSchema(
       name: r'amount',
       type: IsarType.double,
     ),
-    r'description': PropertySchema(
+    r'applyUntil': PropertySchema(
       id: 1,
+      name: r'applyUntil',
+      type: IsarType.dateTime,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.string,
+    ),
+    r'startingFrom': PropertySchema(
+      id: 3,
+      name: r'startingFrom',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _periodIncomeModelEstimateSize,
@@ -59,7 +69,9 @@ void _periodIncomeModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.amount);
-  writer.writeString(offsets[1], object.description);
+  writer.writeDateTime(offsets[1], object.applyUntil);
+  writer.writeString(offsets[2], object.description);
+  writer.writeDateTime(offsets[3], object.startingFrom);
 }
 
 PeriodIncomeModel _periodIncomeModelDeserialize(
@@ -70,7 +82,9 @@ PeriodIncomeModel _periodIncomeModelDeserialize(
 ) {
   final object = PeriodIncomeModel(
     amount: reader.readDouble(offsets[0]),
-    description: reader.readString(offsets[1]),
+    applyUntil: reader.readDateTime(offsets[1]),
+    description: reader.readString(offsets[2]),
+    startingFrom: reader.readDateTime(offsets[3]),
   );
   object.id = id;
   return object;
@@ -86,7 +100,11 @@ P _periodIncomeModelDeserializeProp<P>(
     case 0:
       return (reader.readDouble(offset)) as P;
     case 1:
+      return (reader.readDateTime(offset)) as P;
+    case 2:
       return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -250,6 +268,62 @@ extension PeriodIncomeModelQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      applyUntilEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'applyUntil',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      applyUntilGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'applyUntil',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      applyUntilLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'applyUntil',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      applyUntilBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'applyUntil',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -445,6 +519,62 @@ extension PeriodIncomeModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      startingFromEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'startingFrom',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      startingFromGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'startingFrom',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      startingFromLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'startingFrom',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterFilterCondition>
+      startingFromBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'startingFrom',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension PeriodIncomeModelQueryObject
@@ -470,6 +600,20 @@ extension PeriodIncomeModelQuerySortBy
   }
 
   QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      sortByApplyUntil() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'applyUntil', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      sortByApplyUntilDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'applyUntil', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
       sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -480,6 +624,20 @@ extension PeriodIncomeModelQuerySortBy
       sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      sortByStartingFrom() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startingFrom', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      sortByStartingFromDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startingFrom', Sort.desc);
     });
   }
 }
@@ -497,6 +655,20 @@ extension PeriodIncomeModelQuerySortThenBy
       thenByAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'amount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      thenByApplyUntil() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'applyUntil', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      thenByApplyUntilDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'applyUntil', Sort.desc);
     });
   }
 
@@ -526,6 +698,20 @@ extension PeriodIncomeModelQuerySortThenBy
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      thenByStartingFrom() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startingFrom', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QAfterSortBy>
+      thenByStartingFromDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startingFrom', Sort.desc);
+    });
+  }
 }
 
 extension PeriodIncomeModelQueryWhereDistinct
@@ -538,9 +724,23 @@ extension PeriodIncomeModelQueryWhereDistinct
   }
 
   QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QDistinct>
+      distinctByApplyUntil() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'applyUntil');
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QDistinct>
       distinctByDescription({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, PeriodIncomeModel, QDistinct>
+      distinctByStartingFrom() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'startingFrom');
     });
   }
 }
@@ -559,10 +759,24 @@ extension PeriodIncomeModelQueryProperty
     });
   }
 
+  QueryBuilder<PeriodIncomeModel, DateTime, QQueryOperations>
+      applyUntilProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'applyUntil');
+    });
+  }
+
   QueryBuilder<PeriodIncomeModel, String, QQueryOperations>
       descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<PeriodIncomeModel, DateTime, QQueryOperations>
+      startingFromProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'startingFrom');
     });
   }
 }

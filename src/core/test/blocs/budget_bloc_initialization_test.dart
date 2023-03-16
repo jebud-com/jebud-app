@@ -74,8 +74,14 @@ void main() {
 
       when(() => budgetRepository.getPeriodIncomes())
           .thenAnswer((invocation) => Future.value([
-                PeriodIncome(amount: 200, description: "Some salary"),
-                PeriodIncome(amount: 1000, description: "Some retirement")
+                PeriodIncome(
+                    amount: 200,
+                    description: "Some salary",
+                    startingFrom: DateTime.parse("2023-03-01")),
+                PeriodIncome(
+                    amount: 1000,
+                    description: "Some retirement",
+                    startingFrom: DateTime.parse("2023-03-01"))
               ]));
 
       when(() => budgetRepository.getPeriodExpenses())
@@ -138,8 +144,14 @@ void main() {
               applyUntil: DateTime.parse("2023-06-12"))
         ],
         incomes: [
-          PeriodIncome(amount: 200, description: "Some salary"),
-          PeriodIncome(amount: 1000, description: "Some retirement")
+          PeriodIncome(
+              amount: 200,
+              description: "Some salary",
+              startingFrom: DateTime.parse("2023-03-01")),
+          PeriodIncome(
+              amount: 1000,
+              description: "Some retirement",
+              startingFrom: DateTime.parse("2023-03-01"))
         ],
         dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 500),
       )
