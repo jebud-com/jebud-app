@@ -7,6 +7,7 @@ import '../components/month_summary.dart';
 
 class MyHomePage extends StatefulWidget {
   static const String name = "/home";
+
   const MyHomePage({super.key});
 
   @override
@@ -14,13 +15,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  int _selectedIndex = 0;
   late final TabController _tabController;
 
   @override
   void initState() {
-    _tabController =
-        TabController(length: 2, vsync: this, initialIndex: _selectedIndex);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     super.initState();
   }
 
@@ -38,32 +37,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       extendBodyBehindAppBar: true,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
+        selectedIndex: _tabController.index,
         destinations: const [
           NavigationDestination(
               icon: Icon(Icons.calculate_outlined), label: "Summary"),
           NavigationDestination(
               icon: Icon(Icons.question_mark), label: "WhatIf"),
+          NavigationDestination(icon: Icon(Icons.settings), label: "Settings"),
         ],
         onDestinationSelected: (newIndex) {
-          if (newIndex == 1) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Coming soon :)'),
-              ),
-            );
-            return;
-          }
           setState(() {
-            _selectedIndex = newIndex;
-            _tabController.animateTo(_selectedIndex);
+            _tabController.animateTo(newIndex);
           });
         },
       ),
       body: TabBarView(
         physics: const NeverScrollableScrollPhysics(),
         controller: _tabController,
-        children: const [MonthSummary(), Text("")],
+        children: const [MonthSummary(), Text(""), Settings()],
       ),
       floatingActionButton: _tabController.index == 0
           ? FloatingActionButton(
