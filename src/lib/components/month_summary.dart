@@ -92,7 +92,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                                     child: BudgetText(
                                                       orangeBoundary: 100,
                                                       nbrFormatter:
-                                                          compactCurrencyFormatter,
+                                                          currencyFormatter,
                                                       budget: detailedBudget
                                                           .getLeftDailyExpenseForRunningMonth(
                                                               DateTime.now()),
@@ -117,7 +117,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                                     child: BudgetText(
                                                       orangeBoundary: 50,
                                                       nbrFormatter:
-                                                          compactCurrencyFormatter,
+                                                          currencyFormatter,
                                                       budget: detailedBudget
                                                           .getLeftDailyExpenseForRunningWeek(
                                                               DateTime.now()),
@@ -142,7 +142,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                                     child: BudgetText(
                                                       orangeBoundary: 10,
                                                       nbrFormatter:
-                                                          compactCurrencyFormatter,
+                                                          currencyFormatter,
                                                       budget: detailedBudget
                                                           .getLeftDailyExpenseForRunningDay(
                                                               DateTime.now()),
@@ -199,7 +199,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                       const Text('Next month'),
-                                      Text(compactCurrencyFormatter.format(
+                                      Text(currencyFormatter.format(
                                           state.estimateSavingsUpTo(
                                               DateTime.now().copyWith(
                                                   month: DateTime.now().month +
@@ -211,7 +211,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                       const Text('3 months later'),
-                                      Text(compactCurrencyFormatter.format(
+                                      Text(currencyFormatter.format(
                                           state.estimateSavingsUpTo(
                                               DateTime.now().copyWith(
                                                   month: DateTime.now().month +
@@ -223,7 +223,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                       const Text('6 months later'),
-                                      Text(compactCurrencyFormatter.format(
+                                      Text(currencyFormatter.format(
                                           state.estimateSavingsUpTo(
                                               DateTime.now().copyWith(
                                                   month: DateTime.now().month +
@@ -235,7 +235,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                       const Text('1 year later'),
-                                      Text(compactCurrencyFormatter.format(
+                                      Text(currencyFormatter.format(
                                           state.estimateSavingsUpTo(
                                               DateTime.now().copyWith(
                                                   year: DateTime.now().year +
