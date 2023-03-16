@@ -92,4 +92,59 @@ void main() {
             description: 'Pizza'))).called(1);
         verifyNoMoreInteractions(budgetRepository);
       });
+
+  blocTest<BudgetManagerBloc, BudgetManagerBlocState>(
+      "Add daily expense when previous one already exist",
+      build: () => budgetManagerBloc,
+      setUp: () {
+        when(() => budgetRepository
+                .addDailyExpense(any(that: isA<DailyExpense>())))
+            .thenAnswer((invocation) => Future.value());
+        when(() => dateTimeService.today)
+            .thenReturn(DateTime.parse("2023-03-10"));
+      },
+      act: (bloc) =>
+          bloc.add(AddDailyExpense(amount: 12, description: "Pizza")),
+      seed: () => DetailedBudget(
+              dailyExpenses: [
+                DailyExpense(
+                    amount: 40,
+                    day: DateTime.parse("2023-03-10"),
+                    description: "old")
+              ],
+              budgetDetails: BudgetDetails(
+                  startingAmount: 100, startingMonth: budgetStartDate)),
+      expect: () => [
+            DetailedBudget(
+                budgetDetails: BudgetDetails(
+                    startingAmount: 100, startingMonth: budgetStartDate),
+                isAddingDailyExpense: true,
+                dailyExpenses: [
+                  DailyExpense(
+                      amount: 40,
+                      day: DateTime.parse("2023-03-10"),
+                      description: "old")
+                ]),
+            DetailedBudget(
+                budgetDetails: BudgetDetails(
+                    startingAmount: 100, startingMonth: budgetStartDate),
+                isAddingDailyExpense: false,
+                dailyExpenses: [
+                  DailyExpense(
+                      amount: 40,
+                      day: DateTime.parse("2023-03-10"),
+                      description: "old"),
+                  DailyExpense(
+                      amount: 12,
+                      day: DateTime.parse("2023-03-10"),
+                      description: 'Pizza')
+                ]),
+          ],
+      verify: (_) {
+        verify(() => budgetRepository.addDailyExpense(DailyExpense(
+            amount: 12,
+            day: DateTime.parse("2023-03-10"),
+            description: 'Pizza'))).called(1);
+        verifyNoMoreInteractions(budgetRepository);
+      });
 }

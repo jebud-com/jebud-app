@@ -116,7 +116,11 @@ class BudgetManagerBloc
         description: event.description);
     await _budgetRepository.addDailyExpense(dailyExpense);
     emit(DetailedBudget.copyFromWith(state as DetailedBudget,
-        isAddingDailyExpense: false, dailyExpenses: [dailyExpense]));
+        isAddingDailyExpense: false,
+        dailyExpenses: [
+          ...(state as DetailedBudget).dailyExpenses,
+          dailyExpense
+        ]));
   }
 }
 
