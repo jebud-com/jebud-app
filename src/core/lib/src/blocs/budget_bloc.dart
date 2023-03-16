@@ -349,11 +349,55 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   }
 
   double getLeftDailyExpenseForRunningWeek(DateTime today) {
+    var startCurrentWeek =
+        today.add(Duration(days: DateTime.monday - today.weekday)).copyWith(
+              hour: 0,
+              minute: 0,
+              millisecond: 0,
+              second: 0,
+              microsecond: 0,
+            );
+    final isStartOfCurrentWeekWasLastMonth =
+        startCurrentWeek.month != today.month;
+    if (isStartOfCurrentWeekWasLastMonth) {
+      startCurrentWeek = today.getFirstOfMonthAtMidnight();
+    }
     var lastDayOfMonth = DateTime(today.year, today.month + 1, 0);
-    var diffInDaysToEndOfMonth = lastDayOfMonth.difference(today).inDays + 1;
-    var daysToSunday = (DateTime.sunday - today.weekday + 1);
-    return getLeftDailyExpenseForRunningDay(today) *
-        min(daysToSunday, diffInDaysToEndOfMonth);
+    var diffInDayFromStartOfWeekToEndOfMonth =
+        lastDayOfMonth.difference(startCurrentWeek).inDays + 1;
+    var daysToSundayFromStartOfWeek =
+        (DateTime.sunday - startCurrentWeek.weekday + 1);
+    var lastDayOfLastWeek = startCurrentWeek.add(Duration(days: -1));
+
+    final isTodayStartOfMonth =
+        startCurrentWeek != today.getFirstOfMonthAtMidnight();
+
+    var expensesOfEarlierWeeksOfCurrentMonth = dailyExpenses
+        .where((element) =>
+            element.day.month == lastDayOfLastWeek.month &&
+            element.day.year == lastDayOfLastWeek.year &&
+            element.day.day <= lastDayOfLastWeek.day)
+        .fold(0.0, (value, element) => value + element.amount);
+
+    var allRemainingToSpendUpToThisWeek = (dailyExpenseAllocation.amount -
+        (isTodayStartOfMonth ? expensesOfEarlierWeeksOfCurrentMonth : 0));
+
+    var allowedToSpendUpToThisWeekPerDay =
+        allRemainingToSpendUpToThisWeek / diffInDayFromStartOfWeekToEndOfMonth;
+
+    final allowedToSpendForThisWeek = allowedToSpendUpToThisWeekPerDay *
+        min(daysToSundayFromStartOfWeek, diffInDayFromStartOfWeekToEndOfMonth);
+
+    final earlierExpensesOfThisWeek = dailyExpenses
+        .where((element) =>
+            element.day.year == startCurrentWeek.year &&
+                element.day.month == startCurrentWeek.month &&
+                element.day.isAfter(startCurrentWeek) ||
+            element.day.isAtSameMomentAs(startCurrentWeek))
+        .fold(0.0, (value, element) => value + element.amount);
+
+    return double.parse((allowedToSpendForThisWeek - earlierExpensesOfThisWeek)
+        .toStringAsFixed(2));
   }
 
   double getLeftDailyExpenseForRunningMonth(DateTime today) {

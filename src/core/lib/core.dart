@@ -11,6 +11,7 @@ export './src/blocs/budget_bloc.dart'
         AddPeriodIncome,
         AddPeriodExpense,
         AddDailyExpenseAllocation,
+        UpdateDailyExpenseAllocation,
         AddDailyExpense,
         InitializeBudget;
 export 'src/entities/daily_expense.dart' show DailyExpense;

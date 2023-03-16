@@ -58,7 +58,7 @@ void main() {
       test("week Expense - start of start of week  and no daily expense", () {
         var dailyLeft = budgetDetails
             .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-02"));
-        expect(dailyLeft, equals(93.31));
+        expect(dailyLeft, equals(93.33));
       });
 
       test("week Expense - end of last of week  and no daily expense", () {
@@ -90,6 +90,16 @@ void main() {
         expect(weeklyLeft, equals(2.90));
       });
 
+      test("weekly Expense - start of month and partial daily expense", () {
+        var weeklyLeft = dailySpentBudgetDetails
+            .addDailyExpense(
+                amount: 2.90,
+                day: DateTime.parse("2023-01-01"),
+                description: "finishing")
+            .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-01"));
+        expect(weeklyLeft, equals(0.0));
+      });
+
       test("monthly expense - start of month and partial daily expense", () {
         var monthlyLeft = dailySpentBudgetDetails
             .getLeftDailyExpenseForRunningMonth(DateTime.parse("2023-01-01"));
@@ -101,6 +111,31 @@ void main() {
             .getLeftDailyExpenseForRunningDay(DateTime.parse("2023-01-02"));
         expect(dailyLeft, equals(13));
       });
+
+      test(
+          "weekly Expense - next week of month and partial daily expense for current day",
+          () {
+        var dailyLeft = dailySpentBudgetDetails
+            .addDailyExpense(
+                amount: 10,
+                day: DateTime.parse("2023-01-02"),
+                description: "coca")
+            .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-02"));
+        expect(dailyLeft, equals(81));
+      });
+
+      test(
+          "weekly Expense - next week of month and partial daily expense for current day",
+          () {
+        var dailyLeft = dailySpentBudgetDetails
+            .addDailyExpense(
+                amount: 91,
+                day: DateTime.parse("2023-01-02"),
+                description: "coca")
+            .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-02"));
+        expect(dailyLeft, equals(0));
+      });
+
       test("daily Expense - next week of month and two partial daily expense",
           () {
         var dailyLeft = dailySpentBudgetDetails
@@ -129,13 +164,58 @@ void main() {
         expect(dailyLeft, equals(-7.1));
       });
 
-      test("daily Expense - next day  of month and excessive daily expense",
-          () {
+      test("weekly Expense - start of month and excessive daily expense", () {
+        var dailyLeft = dailyExcessiveSpentBudgetDetails
+            .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-01"));
+        expect(dailyLeft, equals(-7.1));
+      });
+
+      test("daily Expense - next day of month and excessive daily expense", () {
         var dailyLeft = dailyExcessiveSpentBudgetDetails
             .getLeftDailyExpenseForRunningDay(DateTime.parse("2023-01-02"));
         expect(dailyLeft, equals(12.67));
       });
 
+      test("weekly Expense - next day of month and excessive daily expense",
+          () {
+        var dailyLeft = dailyExcessiveSpentBudgetDetails
+            .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-02"));
+        expect(dailyLeft, equals(88.67));
+      });
+
+      test("weekly Expense - next day of month and second excessive daily expense",
+          () {
+        var dailyLeft = dailyExcessiveSpentBudgetDetails
+            .addDailyExpense(
+                amount: 20,
+                day: DateTime.parse("2023-01-02"),
+                description: "another excessive")
+            .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-02"));
+        expect(dailyLeft, equals(68.67));
+      });
+
+      test("weekly Expense - next day of month and excessive daily expense equal to allowed per week",
+          () {
+        var dailyLeft = dailyExcessiveSpentBudgetDetails
+            .addDailyExpense(
+                amount: 88.67,
+                day: DateTime.parse("2023-01-02"),
+                description: "another excessive")
+            .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-05"));
+        expect(dailyLeft, equals(0));
+      });
+
+      test("weekly Expense - next day of month and excessive daily expense more than allowed per week",
+              () {
+            var dailyLeft = dailyExcessiveSpentBudgetDetails
+                .addDailyExpense(
+                amount: 88.67 + 20,
+                day: DateTime.parse("2023-01-02"),
+                description: "another excessive")
+                .getLeftDailyExpenseForRunningWeek(DateTime.parse("2023-01-05"));
+            expect(dailyLeft, equals(-20));
+          });
+      
       test("daily Expense - next day of month and two excessive daily expense",
           () {
         var dailyLeft = dailyExcessiveSpentBudgetDetails
