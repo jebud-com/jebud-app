@@ -17,6 +17,9 @@ abstract class BudgetRepository {
   Future addDailyExpenseAllocation(
       DailyExpensePeriodAllocation dailyExpensePeriodAllocation);
 
+  Future updateDailyExpenseAllocation(
+      DailyExpensePeriodAllocation dailyExpensePeriodAllocation);
+
   Future addDailyExpense(DailyExpense dailExpense);
 
   Future<Either<Failure, BudgetDetails>> getBudgetDetails();

@@ -28,6 +28,7 @@ class BudgetManagerBloc
     on<AddPeriodIncome>(_addPeriodIncome);
     on<AddPeriodExpense>(_addPeriodExpense);
     on<AddDailyExpenseAllocation>(_addDailyExpenseAllocation);
+    on<UpdateDailyExpenseAllocation>(_updateDailyExpenseAllocation);
     on<AddDailyExpense>(_addDailyExpense);
   }
 
@@ -102,6 +103,19 @@ class BudgetManagerBloc
     var dailyExpenseAllocation =
         DailyExpensePeriodAllocation(amount: event.amount);
     await _budgetRepository.addDailyExpenseAllocation(dailyExpenseAllocation);
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+        isAddingDailyExpenseAllocation: false,
+        dailyExpenseAllocation: dailyExpenseAllocation));
+  }
+
+  void _updateDailyExpenseAllocation(UpdateDailyExpenseAllocation event,
+      Emitter<BudgetManagerBlocState> emit) async {
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+        isAddingDailyExpenseAllocation: true));
+    var dailyExpenseAllocation =
+        DailyExpensePeriodAllocation(amount: event.amount);
+    await _budgetRepository
+        .updateDailyExpenseAllocation(dailyExpenseAllocation);
     emit(DetailedBudget.copyFromWith(state as DetailedBudget,
         isAddingDailyExpenseAllocation: false,
         dailyExpenseAllocation: dailyExpenseAllocation));
@@ -388,6 +402,12 @@ class AddDailyExpenseAllocation extends BudgetManagerBlocEvent {
   final double amount;
 
   AddDailyExpenseAllocation({required this.amount});
+}
+
+class UpdateDailyExpenseAllocation extends BudgetManagerBlocEvent {
+  final double amount;
+
+  UpdateDailyExpenseAllocation({required this.amount});
 }
 
 class AddDailyExpense extends BudgetManagerBlocEvent {

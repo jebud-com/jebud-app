@@ -54,6 +54,27 @@ void main() {
           equals(dailyExpenseAllocation));
     });
 
+    test("daily expense allocation is updated", () async {
+      var isar = Isar.getInstance(connectionString)!;
+
+      await isar.writeTxn(() async => await isar
+          .dailyExpensePeriodAllocationModels
+          .put(DailyExpensePeriodAllocationModel(amount: 0)));
+
+      final newDailyExpenseAllocation =
+          DailyExpensePeriodAllocation(amount: 400);
+      await budgetRepository
+          .updateDailyExpenseAllocation(newDailyExpenseAllocation);
+
+      var newlySavedDailyExpenseAllocation = await isar
+          .dailyExpensePeriodAllocationModels
+          .get("DailyExpensePeriodAllocation".fastHash());
+
+      expect(newlySavedDailyExpenseAllocation, isNotNull);
+      expect(newlySavedDailyExpenseAllocation!.toEntity(),
+          equals(newDailyExpenseAllocation));
+    });
+
     test("period expense without end date is saved", () async {
       final periodExpense = PeriodExpense(
           amount: 400,

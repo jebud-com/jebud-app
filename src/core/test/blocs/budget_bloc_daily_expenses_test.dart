@@ -55,6 +55,39 @@ void main() {
         verifyNoMoreInteractions(budgetRepository);
       });
 
+  blocTest<BudgetManagerBloc, BudgetManagerBlocState>(
+      "Change Daily Expense Allocation",
+      build: () => budgetManagerBloc,
+      setUp: () {
+        when(() => budgetRepository.updateDailyExpenseAllocation(
+                any(that: isA<DailyExpensePeriodAllocation>())))
+            .thenAnswer((invocation) => Future.value());
+      },
+      seed: () => DetailedBudget(
+          budgetDetails: BudgetDetails(
+              startingAmount: 100, startingMonth: budgetStartDate),
+          dailyExpenseAllocation: DailyExpensePeriodAllocation(amount: 400)),
+      act: (bloc) => bloc.add(UpdateDailyExpenseAllocation(amount: 500)),
+      expect: () => [
+            DetailedBudget(
+                budgetDetails: BudgetDetails(
+                    startingAmount: 100, startingMonth: budgetStartDate),
+                dailyExpenseAllocation:
+                    DailyExpensePeriodAllocation(amount: 400),
+                isAddingDailyExpenseAllocation: true),
+            DetailedBudget(
+                budgetDetails: BudgetDetails(
+                    startingAmount: 100, startingMonth: budgetStartDate),
+                isAddingDailyExpenseAllocation: false,
+                dailyExpenseAllocation:
+                    DailyExpensePeriodAllocation(amount: 500)),
+          ],
+      verify: (_) {
+        verify(() => budgetRepository.updateDailyExpenseAllocation(
+            DailyExpensePeriodAllocation(amount: 500))).called(1);
+        verifyNoMoreInteractions(budgetRepository);
+      });
+
   blocTest<BudgetManagerBloc, BudgetManagerBlocState>("Add daily expense",
       build: () => budgetManagerBloc,
       setUp: () {

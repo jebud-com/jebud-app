@@ -42,6 +42,16 @@ class BudgetRepositoryImpl implements BudgetRepository {
   }
 
   @override
+  Future updateDailyExpenseAllocation(
+      DailyExpensePeriodAllocation dailyExpensePeriodAllocation) async {
+    await _isarInstance.writeTxn(() async {
+      await _isarInstance.dailyExpensePeriodAllocationModels.put(
+          DailyExpensePeriodAllocationModel.fromEntity(
+              dailyExpensePeriodAllocation));
+    });
+  }
+
+  @override
   Future addPeriodExpense(PeriodExpense periodExpense) async {
     await _isarInstance.writeTxn(() async {
       await _isarInstance.periodExpenseModels
