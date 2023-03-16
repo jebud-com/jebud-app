@@ -6,6 +6,7 @@ import 'package:core/src/entities/daily_expense_period_allocation.dart';
 import 'package:core/src/entities/period_expense.dart';
 import 'package:core/src/interfaces/date_time_service.dart';
 import 'package:core/src/repository/budget_repository.dart';
+import 'package:core/src/utils/date_time_extensions.dart';
 import 'package:equatable/equatable.dart';
 
 import '../entities/daily_expense.dart';
@@ -243,11 +244,13 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   }
 
   double _expensesFor(DateTime month) {
+    month = month.getFirstOfMonthAtMidnight();
     return expenses.fold(0.0, (value, element) {
-      if (element.applyUntil.isAtSameMomentAs(month) ||
-          element.startingFrom.isAtSameMomentAs(month) ||
-          element.applyUntil.isAfter(month) &&
-              element.startingFrom.isBefore(month)) {
+      var applyUntil = element.applyUntil.getFirstOfMonthAtMidnight();
+      var startingFrom = element.startingFrom.getFirstOfMonthAtMidnight();
+      if (applyUntil.isAtSameMomentAs(month) ||
+          startingFrom.isAtSameMomentAs(month) ||
+          applyUntil.isAfter(month) && startingFrom.isBefore(month)) {
         return value + element.amount;
       }
       return value;
