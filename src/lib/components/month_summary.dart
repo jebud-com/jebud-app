@@ -58,7 +58,7 @@ class _MonthSummaryState extends State<MonthSummary> {
                                   orangeBoundary: 500,
                                   nbrFormatter: currencyFormatter,
                                   budget: detailedBudget.estimateSavingsUpTo(
-                                      DateTime.now().copyWith(day: 1)),
+                                      DateTime.now()),
                                   fontSize: 32,
                                 )),
                               ],

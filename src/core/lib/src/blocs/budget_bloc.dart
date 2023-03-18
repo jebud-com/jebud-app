@@ -213,13 +213,12 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
       ];
 
   double estimateSavingsUpTo(DateTime targetMonth) {
-    if (budgetDetails.startingMonth.isAfter(targetMonth)) return 0;
+    if (budgetDetails.startingMonth
+        .getFirstOfMonthAtMidnight()
+        .isAfter(targetMonth.getFirstOfMonthAtMidnight())) return 0;
 
     double result = budgetDetails.startingAmount;
     var startMonth = budgetDetails.startingMonth;
-
-    // final totalIncomes =
-    //     incomes.fold(0.0, (value, element) => value + element.amount);
 
     for (int i = 0; i < _numberOfMonthsToTargetMonth(targetMonth); i++) {
       final currentMonth =

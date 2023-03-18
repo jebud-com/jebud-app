@@ -1,5 +1,6 @@
 import 'package:core/src/blocs/budget_bloc.dart';
 import 'package:core/src/entities/budget_details.dart';
+import 'package:core/src/utils/date_time_extensions.dart';
 import 'extensions/detailed_budget_ext.dart';
 import 'package:core/src/entities/daily_expense_period_allocation.dart';
 import 'package:core/src/entities/period_expense.dart';
@@ -87,6 +88,31 @@ void main() {
               startingFrom: DateTime.parse("2023-03-01"))
         ],
         expected: 500 + 399 * 3 + 200 * 3);
+  });
+
+  test(
+      "Calculate estimation with many incomes and expenses same day should ignore time",
+      () {
+    var startingMonth = DateTime.now()
+        .copyWith(year: 2023, month: 03, day: 01, hour: 00, minute: 20);
+    var nextMonth = DateTime.now()
+        .copyWith(year: 2023, month: 04, day: 01)
+        .getSameDayMidnight();
+    var oneDayAfterAtMidnight = DateTime.now()
+        .copyWith(year: 2023, month: 03, day: 01, hour: 00, minute: 10);
+    calculateEstimationForMonthsAndForIncomes(
+        startingAmount: -500,
+        startingMonth: startingMonth,
+        targetMonth: oneDayAfterAtMidnight,
+        incomes: [
+          PeriodIncome(amount: 399, description: '', startingFrom: nextMonth),
+          PeriodIncome(amount: 200, description: '', startingFrom: nextMonth)
+        ],
+        expenses: [
+          PeriodExpense(
+              amount: 650, startingFrom: nextMonth, description: "rent")
+        ],
+        expected: -500);
   });
 
   test("When Period Income is in the future and estimating before it beings",
