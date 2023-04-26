@@ -1,4 +1,4 @@
-﻿import 'package:core/core.dart';
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:infrastructure/src/budget_repository_impl.dart';
 import 'package:infrastructure/src/models/budget_details_model.dart';
@@ -178,7 +178,6 @@ void main() {
         )
       ]);
     });
-    
 
     tearDown(() async {
       var isar = Isar.getInstance(connectionString)!;

@@ -69,14 +69,16 @@ void main() {
       "Then the detailed budget should one daily expense, and the deleted daily expense should be deleted from database",
       build: () => budgetBloc,
       seed: () => getDetailedBudgetWithDailyExpense(
-          dailyExpenses: [dailyExpenseToDelete, dailyExpenseToKeep], isDeletingDailyExpense: false),
+          dailyExpenses: [dailyExpenseToDelete, dailyExpenseToKeep],
+          isDeletingDailyExpense: false),
       act: (bloc) => bloc.add(DeleteDailyExpense(dailyExpenseToDelete)),
       expect: () => [
             getDetailedBudgetWithDailyExpense(
                 dailyExpenses: [dailyExpenseToDelete, dailyExpenseToKeep],
                 isDeletingDailyExpense: true),
             getDetailedBudgetWithDailyExpense(
-                dailyExpenses: [dailyExpenseToKeep], isDeletingDailyExpense: false)
+                dailyExpenses: [dailyExpenseToKeep],
+                isDeletingDailyExpense: false)
           ],
       verify: (_) {
         verify(() => budgetRepository.deleteDailyExpense(dailyExpenseToDelete))
