@@ -1,22 +1,22 @@
-import 'package:core/core.dart';
+﻿import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:infrastructure/src/budget_repository_impl.dart';
 import 'package:infrastructure/src/models/budget_details_model.dart';
 import 'package:infrastructure/src/models/daily_expense_model.dart';
 import 'package:infrastructure/src/models/daily_expense_period_allocation_model.dart';
 import 'package:infrastructure/src/models/period_expense_model.dart';
 import 'package:infrastructure/src/models/period_income_model.dart';
-import 'package:infrastructure/src/utils.dart';
 import 'package:isar/isar.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 void main() {
-  const String connectionString = "commands";
+  const String connectionString = "queries";
   setUpAll(() async {
     await Isar.initializeIsarCore(download: true);
   });
 
-  group("commands", () {
+  group("queries", () {
     late BudgetRepositoryImpl budgetRepository;
 
     setUpAll(() async {
@@ -24,151 +24,161 @@ void main() {
       await budgetRepository.init();
     });
 
-    test("daily expense is saved", () async {
-      final dailyExpense = DailyExpense(
-          amount: 300, day: DateTime.parse("2023-01-01"), description: "pizza");
-      await budgetRepository.addDailyExpense(dailyExpense);
+    test('budget details is retrieved', () async {
+      var result = await budgetRepository.getBudgetDetails();
 
-      var isar = Isar.getInstance(connectionString)!;
-
-      var savedDailyExpense = await isar.dailyExpenseModels.get(
-          ("${300.0.toString()}${DateTime.parse("2023-01-01").toString()}pizza")
-              .fastHash());
-
-      expect(savedDailyExpense, isNotNull);
-      expect(savedDailyExpense!.toEntity(), equals(dailyExpense));
+      result.fold((l) => expect(l, isA<CannotFindBudgetDetails>()),
+          (r) => fail("Unexpected right side of either"));
     });
 
-    test("daily expense allocation is saved", () async {
-      final dailyExpenseAllocation = DailyExpensePeriodAllocation(amount: 400);
-      await budgetRepository.addDailyExpenseAllocation(dailyExpenseAllocation);
-
+    test('budget details is retrieved', () async {
       var isar = Isar.getInstance(connectionString)!;
 
-      var savedDailyExpenseAllocation = await isar
-          .dailyExpensePeriodAllocationModels
-          .get("DailyExpensePeriodAllocation".fastHash());
-
-      expect(savedDailyExpenseAllocation, isNotNull);
-      expect(savedDailyExpenseAllocation!.toEntity(),
-          equals(dailyExpenseAllocation));
-    });
-
-    test("daily expense allocation is updated", () async {
-      var isar = Isar.getInstance(connectionString)!;
-
-      await isar.writeTxn(() async => await isar
-          .dailyExpensePeriodAllocationModels
-          .put(DailyExpensePeriodAllocationModel(amount: 0)));
-
-      final newDailyExpenseAllocation =
-          DailyExpensePeriodAllocation(amount: 400);
-      await budgetRepository
-          .updateDailyExpenseAllocation(newDailyExpenseAllocation);
-
-      var newlySavedDailyExpenseAllocation = await isar
-          .dailyExpensePeriodAllocationModels
-          .get("DailyExpensePeriodAllocation".fastHash());
-
-      expect(newlySavedDailyExpenseAllocation, isNotNull);
-      expect(newlySavedDailyExpenseAllocation!.toEntity(),
-          equals(newDailyExpenseAllocation));
-    });
-
-    test("period expense without end date is saved", () async {
-      final periodExpense = PeriodExpense(
-          amount: 400,
-          description: "somethingElse",
-          startingFrom: DateTime.parse("2023-03-11"));
-      await budgetRepository.addPeriodExpense(periodExpense);
-
-      var isar = Isar.getInstance(connectionString)!;
-
-      var savedPeriodExpense = await isar.periodExpenseModels.get(
-          (400.0.toString() +
-                  "somethingElse".toString() +
-                  DateTime.parse("2023-03-11").toString())
-              .fastHash());
-
-      expect(savedPeriodExpense, isNotNull);
-      expect(savedPeriodExpense!.toEntity(), equals(periodExpense));
-    });
-
-    test("period expense with end date is saved", () async {
-      final periodExpense = PeriodExpense(
-          amount: 400,
-          description: "somethingElse",
-          startingFrom: DateTime.parse("2023-03-11"),
-          applyUntil: DateTime.parse("2023-05-11"));
-      await budgetRepository.addPeriodExpense(periodExpense);
-
-      var isar = Isar.getInstance(connectionString)!;
-
-      var savedPeriodExpense = await isar.periodExpenseModels.get(
-          (400.0.toString() +
-                  "somethingElse".toString() +
-                  DateTime.parse("2023-03-11").toString())
-              .fastHash());
-
-      expect(savedPeriodExpense, isNotNull);
-      expect(savedPeriodExpense!.toEntity(), equals(periodExpense));
-    });
-
-    group("period income is saved", () {
-      test("period income is saved", () async {
-        final periodIncome = PeriodIncome(
-            amount: 400,
-            description: "somethingElse",
-            startingFrom: DateTime.parse("2023-01-23"));
-        await budgetRepository.addPeriodIncome(periodIncome);
-
-        var isar = Isar.getInstance(connectionString)!;
-
-        var savedPeriodIncome = await isar.periodIncomeModels.get(
-            (400.0.toString() +
-                    "somethingElse".toString() +
-                    DateTime.parse("2023-01-23").toString())
-                .fastHash());
-
-        expect(savedPeriodIncome, isNotNull);
-        expect(savedPeriodIncome!.toEntity(), equals(periodIncome));
+      await isar.writeTxn(() async {
+        isar.budgetDetailsModels.put(BudgetDetailsModel(
+            startingAmount: -500, startingMonth: DateTime.parse("2023-01-01")));
       });
 
-      test("period income is saved with end date", () async {
-        final periodIncome = PeriodIncome(
-            amount: 400,
-            description: "withEnd",
-            startingFrom: DateTime.parse("2023-01-23"),
-            applyUntil: DateTime.parse("2023-06-23"));
-        await budgetRepository.addPeriodIncome(periodIncome);
+      var result = await budgetRepository.getBudgetDetails();
 
-        var isar = Isar.getInstance(connectionString)!;
-
-        var savedPeriodIncome = await isar.periodIncomeModels.get(
-            (400.0.toString() +
-                    "withEnd".toString() +
-                    DateTime.parse("2023-01-23").toString())
-                .fastHash());
-
-        expect(savedPeriodIncome, isNotNull);
-        expect(savedPeriodIncome!.toEntity(), equals(periodIncome));
-      });
+      expect(
+          result,
+          Right(BudgetDetails(
+              startingAmount: -500,
+              startingMonth: DateTime.parse("2023-01-01"))));
     });
 
-    test("budget details is saved", () async {
-      final budgetDetails = BudgetDetails(
-          startingAmount: 300, startingMonth: DateTime.parse("2023-03-01"));
-      await budgetRepository.saveBudgetDetails(budgetDetails);
+    test('daily expense allocation is not present', () async {
+      var result = await budgetRepository.getDailyExpenseAllocation();
 
+      expect(result, isNull);
+    });
+
+    test('daily expense allocation is retrieved', () async {
       var isar = Isar.getInstance(connectionString)!;
 
-      var savedBudgetDetails = await isar.budgetDetailsModels.get(
-          (300.0.toString() + DateTime.parse("2023-03-01").toString())
-              .fastHash());
+      await isar.writeTxn(() async {
+        isar.dailyExpensePeriodAllocationModels
+            .put(DailyExpensePeriodAllocationModel(amount: 400));
+      });
 
-      expect(savedBudgetDetails, isNotNull);
-      expect(savedBudgetDetails!.toEntity(), equals(budgetDetails));
+      var result = await budgetRepository.getDailyExpenseAllocation();
+
+      expect(result, DailyExpensePeriodAllocation(amount: 400));
     });
+
+    test('incomes are not present', () async {
+      var result = await budgetRepository.getPeriodIncomes();
+
+      expect(result, <PeriodIncome>[]);
+    });
+
+    test('incomes are retrieved', () async {
+      var isar = Isar.getInstance(connectionString)!;
+
+      await isar.writeTxn(() async {
+        isar.periodIncomeModels.put(PeriodIncomeModel(
+            amount: 100,
+            description: "something",
+            startingFrom: DateTime.parse("2023-01-03"),
+            applyUntil: DateTime.parse("2023-10-04")));
+        isar.periodIncomeModels.put(PeriodIncomeModel(
+            amount: 500,
+            description: "something else",
+            startingFrom: DateTime.parse("2023-06-01"),
+            applyUntil: DateTime.parse("2023-10-04")));
+      });
+
+      var result = await budgetRepository.getPeriodIncomes();
+
+      expect(result, <PeriodIncome>[
+        PeriodIncome(
+            amount: 100,
+            description: "something",
+            startingFrom: DateTime.parse("2023-01-03"),
+            applyUntil: DateTime.parse("2023-10-04")),
+        PeriodIncome(
+            amount: 500,
+            description: "something else",
+            startingFrom: DateTime.parse("2023-06-01"),
+            applyUntil: DateTime.parse("2023-10-04")),
+      ]);
+    });
+
+    test('expenses are not present', () async {
+      var result = await budgetRepository.getPeriodExpenses();
+
+      expect(result, <PeriodExpense>[]);
+    });
+
+    test('expenses are retrieved', () async {
+      var isar = Isar.getInstance(connectionString)!;
+
+      await isar.writeTxn(() async {
+        isar.periodExpenseModels.put(PeriodExpenseModel(
+            amount: 100,
+            description: "something",
+            startingFrom: DateTime.parse("2023-01-05"),
+            applyUntil: DateTime(275760, 09, 13)));
+        isar.periodExpenseModels.put(PeriodExpenseModel(
+            amount: 500,
+            description: "something else",
+            startingFrom: DateTime.parse("2023-06-12"),
+            applyUntil: DateTime.parse("2023-06-30")));
+      });
+
+      var result = await budgetRepository.getPeriodExpenses();
+
+      expect(result, <PeriodExpense>[
+        PeriodExpense(
+          amount: 100,
+          description: "something",
+          startingFrom: DateTime.parse("2023-01-05"),
+        ),
+        PeriodExpense(
+            amount: 500,
+            description: "something else",
+            startingFrom: DateTime.parse("2023-06-12"),
+            applyUntil: DateTime.parse("2023-06-30"))
+      ]);
+    });
+
+    test("daily expenses are not present", () async {
+      var result = await budgetRepository.getDailyExpenses();
+      expect(result, []);
+    });
+
+    test("daily expenses are retrieved", () async {
+      var isar = Isar.getInstance(connectionString)!;
+
+      await isar.writeTxn(() async {
+        isar.dailyExpenseModels.put(DailyExpenseModel(
+          amount: 100,
+          description: "something",
+          day: DateTime.parse("2023-01-05"),
+        ));
+        isar.dailyExpenseModels.put(DailyExpenseModel(
+          amount: 500,
+          description: "something else",
+          day: DateTime.parse("2023-06-12"),
+        ));
+      });
+
+      var result = await budgetRepository.getDailyExpenses();
+      expect(result, [
+        DailyExpense(
+          amount: 100,
+          description: "something",
+          day: DateTime.parse("2023-01-05"),
+        ),
+        DailyExpense(
+          amount: 500,
+          description: "something else",
+          day: DateTime.parse("2023-06-12"),
+        )
+      ]);
+    });
+    
 
     tearDown(() async {
       var isar = Isar.getInstance(connectionString)!;

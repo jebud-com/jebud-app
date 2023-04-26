@@ -108,4 +108,11 @@ class BudgetRepositoryImpl implements BudgetRepository {
     return (await _isarInstance.periodIncomeModels.where().findAll())
         .map((e) => e.toEntity());
   }
+
+  @override
+  Future deleteDailyExpense(DailyExpense dailyExpense) async {
+    await _isarInstance.writeTxn(() async => await _isarInstance
+        .dailyExpenseModels
+        .delete(DailyExpenseModel.fromEntity(dailyExpense).id));
+  }
 }

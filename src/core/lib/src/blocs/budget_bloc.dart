@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
@@ -31,6 +32,7 @@ class BudgetManagerBloc
     on<AddDailyExpenseAllocation>(_addDailyExpenseAllocation);
     on<UpdateDailyExpenseAllocation>(_updateDailyExpenseAllocation);
     on<AddDailyExpense>(_addDailyExpense);
+    on<DeleteDailyExpense>(_deleteDailyExpense);
   }
 
   void _initializeBudget(InitializeBudget event, Emitter emit) async {
@@ -141,6 +143,19 @@ class BudgetManagerBloc
           dailyExpense
         ]));
   }
+
+  void _deleteDailyExpense(
+      DeleteDailyExpense event, Emitter<BudgetManagerBlocState> emit) async {
+    var detailedBudget = state as DetailedBudget;
+    emit(DetailedBudget.copyFromWith(detailedBudget,
+        isDeletingDailyExpense: true));
+    detailedBudget = state as DetailedBudget;
+    await _budgetRepository.deleteDailyExpense(event.dailyExpenseToDelete);
+    var updatedDailyExpenses = [...detailedBudget.dailyExpenses];
+    updatedDailyExpenses.remove(event.dailyExpenseToDelete);
+    emit(DetailedBudget.copyFromWith(detailedBudget,
+        dailyExpenses: updatedDailyExpenses, isDeletingDailyExpense: false));
+  }
 }
 
 class UninitializedBudget extends BudgetManagerBlocState {}
@@ -159,6 +174,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   final bool isAddingExpense;
   final bool isAddingDailyExpense;
   final bool isAddingDailyExpenseAllocation;
+  final bool isDeletingDailyExpense;
 
   DetailedBudget(
       {required this.budgetDetails,
@@ -168,6 +184,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
       this.isAddingIncome = false,
       this.isAddingExpense = false,
       this.isAddingDailyExpense = false,
+      this.isDeletingDailyExpense = false,
       this.isAddingDailyExpenseAllocation = false,
       DailyExpensePeriodAllocation? dailyExpenseAllocation}) {
     this.incomes = incomes ?? [];
@@ -184,6 +201,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
           bool? isAddingExpense,
           bool? isAddingIncome,
           bool? isAddingDailyExpense,
+          bool? isDeletingDailyExpense,
           bool? isAddingDailyExpenseAllocation,
           DailyExpensePeriodAllocation? dailyExpenseAllocation}) =>
       DetailedBudget(
@@ -198,6 +216,8 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
           isAddingExpense: isAddingExpense ?? oldDetailedBudget.isAddingExpense,
           isAddingDailyExpense:
               isAddingDailyExpense ?? oldDetailedBudget.isAddingDailyExpense,
+          isDeletingDailyExpense: isDeletingDailyExpense ??
+              oldDetailedBudget.isDeletingDailyExpense,
           isAddingIncome: isAddingIncome ?? oldDetailedBudget.isAddingIncome);
 
   @override
@@ -209,6 +229,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
         isAddingIncome,
         isAddingExpense,
         isAddingDailyExpense,
+        isDeletingDailyExpense,
         isAddingDailyExpenseAllocation
       ];
 
@@ -489,3 +510,9 @@ class AddDailyExpense extends BudgetManagerBlocEvent {
 }
 
 class InitializeBudget extends BudgetManagerBlocEvent {}
+
+class DeleteDailyExpense extends BudgetManagerBlocEvent {
+  final DailyExpense dailyExpenseToDelete;
+
+  DeleteDailyExpense(this.dailyExpenseToDelete);
+}
