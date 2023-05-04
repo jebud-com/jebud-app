@@ -196,7 +196,7 @@ void main() {
       Isar isar = Isar.getInstance(connectionString)!;
 
       var model = PeriodIncomeModel.fromEntity(periodIncome);
-      isar.writeTxn(() => isar.periodIncomeModels.put(model));
+      await isar.writeTxn(() => isar.periodIncomeModels.put(model));
 
       await budgetRepository.permanentlyDeletePeriodIncome(periodIncome);
 
@@ -228,6 +228,48 @@ void main() {
           (await isar.periodIncomeModels.get(model.id))!.toEntity();
 
       expect(updatedPeriodIncomeFromDb, equals(updatedPeriodIncome));
+    });
+
+    test(
+        "Given a period expense, when deleting it, then it shouldn't exist in the db",
+        () async {
+      PeriodExpense periodExpense = PeriodExpense(
+          amount: 24, description: "Monoprix", startingFrom: DateTime.now());
+
+      Isar isar = Isar.getInstance(connectionString)!;
+
+      var model = PeriodExpenseModel.fromEntity(periodExpense);
+      await isar.writeTxn(() => isar.periodExpenseModels.put(model));
+
+      await budgetRepository.permanentlyDeletePeriodExpense(periodExpense);
+
+      var deletedPeriodExpense = await isar.periodExpenseModels.get(model.id);
+
+      expect(deletedPeriodExpense, equals(null));
+    });
+
+    test("Given a period expense, when updating it, it should be updated in db",
+        () async {
+      PeriodExpense periodExpense = PeriodExpense(
+          amount: 24, description: "Monoprix", startingFrom: DateTime.now());
+
+      Isar isar = Isar.getInstance(connectionString)!;
+
+      var model = PeriodExpenseModel.fromEntity(periodExpense);
+      await isar.writeTxn(() => isar.periodExpenseModels.put(model));
+
+      var updatedPeriodExpense = PeriodExpense(
+          amount: periodExpense.amount,
+          description: periodExpense.description,
+          startingFrom: periodExpense.startingFrom,
+          applyUntil: DateTime.now());
+
+      await budgetRepository.updatePeriodExpense(updatedPeriodExpense);
+
+      var updatedPeriodExpenseFromDb =
+          (await isar.periodExpenseModels.get(model.id))!.toEntity();
+
+      expect(updatedPeriodExpenseFromDb, equals(updatedPeriodExpense));
     });
 
     tearDown(() async {

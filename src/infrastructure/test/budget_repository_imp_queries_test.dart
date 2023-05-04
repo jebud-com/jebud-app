@@ -35,7 +35,7 @@ void main() {
       var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
-        isar.budgetDetailsModels.put(BudgetDetailsModel(
+        await isar.budgetDetailsModels.put(BudgetDetailsModel(
             startingAmount: -500, startingMonth: DateTime.parse("2023-01-01")));
       });
 
@@ -58,7 +58,7 @@ void main() {
       var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
-        isar.dailyExpensePeriodAllocationModels
+        await isar.dailyExpensePeriodAllocationModels
             .put(DailyExpensePeriodAllocationModel(amount: 400));
       });
 
@@ -77,12 +77,12 @@ void main() {
       var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
-        isar.periodIncomeModels.put(PeriodIncomeModel(
+        await isar.periodIncomeModels.put(PeriodIncomeModel(
             amount: 100,
             description: "something",
             startingFrom: DateTime.parse("2023-01-03"),
             applyUntil: DateTime.parse("2023-10-04")));
-        isar.periodIncomeModels.put(PeriodIncomeModel(
+        await isar.periodIncomeModels.put(PeriodIncomeModel(
             amount: 500,
             description: "something else",
             startingFrom: DateTime.parse("2023-06-01"),
@@ -115,12 +115,12 @@ void main() {
       var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
-        isar.periodExpenseModels.put(PeriodExpenseModel(
+        await isar.periodExpenseModels.put(PeriodExpenseModel(
             amount: 100,
             description: "something",
             startingFrom: DateTime.parse("2023-01-05"),
             applyUntil: DateTime(275760, 09, 13)));
-        isar.periodExpenseModels.put(PeriodExpenseModel(
+        await isar.periodExpenseModels.put(PeriodExpenseModel(
             amount: 500,
             description: "something else",
             startingFrom: DateTime.parse("2023-06-12"),
@@ -152,12 +152,12 @@ void main() {
       var isar = Isar.getInstance(connectionString)!;
 
       await isar.writeTxn(() async {
-        isar.dailyExpenseModels.put(DailyExpenseModel(
+        await isar.dailyExpenseModels.put(DailyExpenseModel(
           amount: 100,
           description: "something",
           day: DateTime.parse("2023-01-05"),
         ));
-        isar.dailyExpenseModels.put(DailyExpenseModel(
+        await isar.dailyExpenseModels.put(DailyExpenseModel(
           amount: 500,
           description: "something else",
           day: DateTime.parse("2023-06-12"),
