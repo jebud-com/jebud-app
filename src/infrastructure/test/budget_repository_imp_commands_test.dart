@@ -217,11 +217,15 @@ void main() {
       await isar.writeTxn(() => isar.periodIncomeModels.put(model));
 
       var updatedPeriodIncome = PeriodIncome(
-          amount: periodIncome.amount, description: periodIncome.description, startingFrom: periodIncome.startingFrom, applyUntil: DateTime.now());
+          amount: periodIncome.amount,
+          description: periodIncome.description,
+          startingFrom: periodIncome.startingFrom,
+          applyUntil: DateTime.now());
 
       await budgetRepository.updatePeriodIncome(updatedPeriodIncome);
 
-      var updatedPeriodIncomeFromDb = (await isar.periodIncomeModels.get(model.id))!.toEntity();
+      var updatedPeriodIncomeFromDb =
+          (await isar.periodIncomeModels.get(model.id))!.toEntity();
 
       expect(updatedPeriodIncomeFromDb, equals(updatedPeriodIncome));
     });

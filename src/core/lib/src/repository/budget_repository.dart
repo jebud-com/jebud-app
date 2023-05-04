@@ -34,8 +34,7 @@ abstract class BudgetRepository {
 
   Future deleteDailyExpense(DailyExpense dailyExpense);
 
-  Future permanentlyDeletePeriodIncome(PeriodIncome incomeToDelete); 
-  
- Future updatePeriodIncome(PeriodIncome incomeToUpdate); 
-}
+  Future permanentlyDeletePeriodIncome(PeriodIncome incomeToDelete);
 
+  Future updatePeriodIncome(PeriodIncome incomeToUpdate);
+}
