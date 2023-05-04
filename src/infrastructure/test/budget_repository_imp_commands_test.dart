@@ -187,6 +187,45 @@ void main() {
       expect(savedBudgetDetails!.toEntity(), equals(budgetDetails));
     });
 
+    test(
+        "Given a period income, when deleting it, then it shouldn't exist in the db",
+        () async {
+      PeriodIncome periodIncome = PeriodIncome(
+          amount: 24, description: "Monoprix", startingFrom: DateTime.now());
+
+      Isar isar = Isar.getInstance(connectionString)!;
+
+      var model = PeriodIncomeModel.fromEntity(periodIncome);
+      isar.writeTxn(() => isar.periodIncomeModels.put(model));
+
+      await budgetRepository.permanentlyDeletePeriodIncome(periodIncome);
+
+      var deletedPeriodIncome = await isar.periodIncomeModels.get(model.id);
+
+      expect(deletedPeriodIncome, equals(null));
+    });
+
+    test(
+        "Given a period income, when updating it, then it should be updated in the db",
+        () async {
+      PeriodIncome periodIncome = PeriodIncome(
+          amount: 24, description: "Monoprix", startingFrom: DateTime.now());
+
+      Isar isar = Isar.getInstance(connectionString)!;
+
+      var model = PeriodIncomeModel.fromEntity(periodIncome);
+      await isar.writeTxn(() => isar.periodIncomeModels.put(model));
+
+      var updatedPeriodIncome = PeriodIncome(
+          amount: periodIncome.amount, description: periodIncome.description, startingFrom: periodIncome.startingFrom, applyUntil: DateTime.now());
+
+      await budgetRepository.updatePeriodIncome(updatedPeriodIncome);
+
+      var updatedPeriodIncomeFromDb = (await isar.periodIncomeModels.get(model.id))!.toEntity();
+
+      expect(updatedPeriodIncomeFromDb, equals(updatedPeriodIncome));
+    });
+
     tearDown(() async {
       var isar = Isar.getInstance(connectionString)!;
       await isar.writeTxn(() async {

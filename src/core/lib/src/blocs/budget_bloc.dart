@@ -33,6 +33,8 @@ class BudgetManagerBloc
     on<UpdateDailyExpenseAllocation>(_updateDailyExpenseAllocation);
     on<AddDailyExpense>(_addDailyExpense);
     on<DeleteDailyExpense>(_deleteDailyExpense);
+    on<PermanentlyDeletePeriodIncome>(_permanentlyDeletePeriodIncome);
+    on<StopPeriodIncome>(_stopPeriodIncome);
   }
 
   void _initializeBudget(InitializeBudget event, Emitter emit) async {
@@ -156,6 +158,47 @@ class BudgetManagerBloc
     emit(DetailedBudget.copyFromWith(detailedBudget,
         dailyExpenses: updatedDailyExpenses, isDeletingDailyExpense: false));
   }
+
+  void _permanentlyDeletePeriodIncome(PermanentlyDeletePeriodIncome event,
+      Emitter<BudgetManagerBlocState> emit) async {
+    emit(
+      DetailedBudget.copyFromWith(state as DetailedBudget,
+          isPermanentlyDeletingPeriodIncome: true),
+    );
+    await _budgetRepository
+        .permanentlyDeletePeriodIncome(event.periodIncomeToDelete);
+    var updatedPeriodIncomes = [...(state as DetailedBudget).incomes];
+    updatedPeriodIncomes.remove(event.periodIncomeToDelete);
+    emit(
+      DetailedBudget.copyFromWith(state as DetailedBudget,
+          isPermanentlyDeletingPeriodIncome: false,
+          incomes: updatedPeriodIncomes),
+    );
+  }
+
+  void _stopPeriodIncome(
+      StopPeriodIncome event, Emitter<BudgetManagerBlocState> emit) async {
+    emit(DetailedBudget.copyFromWith(state as DetailedBudget,
+        isStoppingPeriodIncome: true));
+
+    final stoppedPeriodIncome = PeriodIncome(
+      amount: event.periodIncomeToStop.amount,
+      startingFrom: event.periodIncomeToStop.startingFrom,
+      description: event.periodIncomeToStop.description,
+      applyUntil: event.at,
+    );
+
+    await _budgetRepository.updatePeriodIncome(stoppedPeriodIncome);
+
+    final detailedBudget = state as DetailedBudget;
+    final incomesWithoutTargetPeriodIncome = [...detailedBudget.incomes]
+      ..remove(event.periodIncomeToStop);
+    emit(DetailedBudget.copyFromWith(
+      state as DetailedBudget,
+      incomes: [stoppedPeriodIncome, ...incomesWithoutTargetPeriodIncome],
+      isStoppingPeriodIncome: false,
+    ));
+  }
 }
 
 class UninitializedBudget extends BudgetManagerBlocState {}
@@ -175,18 +218,23 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   final bool isAddingDailyExpense;
   final bool isAddingDailyExpenseAllocation;
   final bool isDeletingDailyExpense;
+  final bool isPermanentlyDeletingPeriodIncome;
+  final bool isStoppingPeriodIncome;
 
-  DetailedBudget(
-      {required this.budgetDetails,
-      List<PeriodIncome>? incomes,
-      List<PeriodExpense>? expenses,
-      List<DailyExpense>? dailyExpenses,
-      this.isAddingIncome = false,
-      this.isAddingExpense = false,
-      this.isAddingDailyExpense = false,
-      this.isDeletingDailyExpense = false,
-      this.isAddingDailyExpenseAllocation = false,
-      DailyExpensePeriodAllocation? dailyExpenseAllocation}) {
+  DetailedBudget({
+    required this.budgetDetails,
+    List<PeriodIncome>? incomes,
+    List<PeriodExpense>? expenses,
+    List<DailyExpense>? dailyExpenses,
+    this.isAddingIncome = false,
+    this.isAddingExpense = false,
+    this.isAddingDailyExpense = false,
+    this.isDeletingDailyExpense = false,
+    this.isAddingDailyExpenseAllocation = false,
+    this.isPermanentlyDeletingPeriodIncome = false,
+    this.isStoppingPeriodIncome = false,
+    DailyExpensePeriodAllocation? dailyExpenseAllocation,
+  }) {
     this.incomes = incomes ?? [];
     this.expenses = expenses ?? [];
     this.dailyExpenses = dailyExpenses ?? [];
@@ -203,6 +251,8 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
           bool? isAddingDailyExpense,
           bool? isDeletingDailyExpense,
           bool? isAddingDailyExpenseAllocation,
+          bool? isPermanentlyDeletingPeriodIncome,
+          bool? isStoppingPeriodIncome,
           DailyExpensePeriodAllocation? dailyExpenseAllocation}) =>
       DetailedBudget(
           budgetDetails: oldDetailedBudget.budgetDetails,
@@ -218,7 +268,12 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
               isAddingDailyExpense ?? oldDetailedBudget.isAddingDailyExpense,
           isDeletingDailyExpense: isDeletingDailyExpense ??
               oldDetailedBudget.isDeletingDailyExpense,
-          isAddingIncome: isAddingIncome ?? oldDetailedBudget.isAddingIncome);
+          isAddingIncome: isAddingIncome ?? oldDetailedBudget.isAddingIncome,
+          isStoppingPeriodIncome: isStoppingPeriodIncome ??
+              oldDetailedBudget.isStoppingPeriodIncome,
+          isPermanentlyDeletingPeriodIncome:
+              isPermanentlyDeletingPeriodIncome ??
+                  oldDetailedBudget.isPermanentlyDeletingPeriodIncome);
 
   @override
   List<Object?> get props => [
@@ -227,10 +282,12 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
         dailyExpenses,
         expenses,
         isAddingIncome,
+        isPermanentlyDeletingPeriodIncome,
         isAddingExpense,
         isAddingDailyExpense,
         isDeletingDailyExpense,
-        isAddingDailyExpenseAllocation
+        isAddingDailyExpenseAllocation,
+        isStoppingPeriodIncome
       ];
 
   double estimateSavingsUpTo(DateTime targetMonth) {
@@ -515,4 +572,17 @@ class DeleteDailyExpense extends BudgetManagerBlocEvent {
   final DailyExpense dailyExpenseToDelete;
 
   DeleteDailyExpense(this.dailyExpenseToDelete);
+}
+
+class PermanentlyDeletePeriodIncome extends BudgetManagerBlocEvent {
+  final PeriodIncome periodIncomeToDelete;
+
+  PermanentlyDeletePeriodIncome(this.periodIncomeToDelete);
+}
+
+class StopPeriodIncome extends BudgetManagerBlocEvent {
+  final DateTime at;
+  final PeriodIncome periodIncomeToStop;
+
+  StopPeriodIncome(this.periodIncomeToStop, {required this.at});
 }

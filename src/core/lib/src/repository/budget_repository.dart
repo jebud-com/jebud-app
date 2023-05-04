@@ -33,4 +33,9 @@ abstract class BudgetRepository {
   Future<Iterable<DailyExpense>> getDailyExpenses();
 
   Future deleteDailyExpense(DailyExpense dailyExpense);
+
+  Future permanentlyDeletePeriodIncome(PeriodIncome incomeToDelete); 
+  
+ Future updatePeriodIncome(PeriodIncome incomeToUpdate); 
 }
+

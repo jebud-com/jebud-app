@@ -115,4 +115,18 @@ class BudgetRepositoryImpl implements BudgetRepository {
         .dailyExpenseModels
         .delete(DailyExpenseModel.fromEntity(dailyExpense).id));
   }
+
+  @override
+  Future permanentlyDeletePeriodIncome(PeriodIncome incomeToDelete) async {
+    await _isarInstance.writeTxn(() async => await _isarInstance
+        .periodIncomeModels
+        .delete(PeriodIncomeModel.fromEntity(incomeToDelete).id));
+  }
+
+  @override
+  Future updatePeriodIncome(PeriodIncome incomeToUpdate) async {
+    await _isarInstance.writeTxn(() async => await _isarInstance
+        .periodIncomeModels
+        .put(PeriodIncomeModel.fromEntity(incomeToUpdate)));
+  }
 }
