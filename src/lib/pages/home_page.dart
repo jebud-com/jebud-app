@@ -19,7 +19,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
     super.initState();
   }
 
@@ -41,8 +41,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         destinations: const [
           NavigationDestination(
               icon: Icon(Icons.calculate_outlined), label: "Summary"),
-          NavigationDestination(
-              icon: Icon(Icons.question_mark), label: "WhatIf"),
           NavigationDestination(icon: Icon(Icons.settings), label: "Settings"),
         ],
         onDestinationSelected: (newIndex) {
@@ -54,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       body: TabBarView(
         physics: const NeverScrollableScrollPhysics(),
         controller: _tabController,
-        children: const [MonthSummary(), Text(""), Settings()],
+        children: const [MonthSummary(), Settings()],
       ),
       floatingActionButton: _tabController.index == 0
           ? FloatingActionButton(

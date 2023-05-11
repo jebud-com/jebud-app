@@ -8,16 +8,22 @@ class SummaryItem {
   SummaryItem({required this.description, required this.amount});
 }
 
-class SummaryList extends StatelessWidget {
+class SummaryList<T> extends StatelessWidget {
   final NumberFormat currencyFormatter;
   final String title;
-  final List<SummaryItem> items;
+  final List<T> items;
+  final SummaryItem Function(T value) toSummaryTile;
+  final Future<bool> Function(T value)? onDelete;
+  final Future<bool> Function(T value)? onStop;
 
   const SummaryList(
       {super.key,
+      this.onDelete,
+      this.onStop,
       required this.currencyFormatter,
       required this.title,
-      required this.items});
+      required this.items,
+      required this.toSummaryTile});
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +39,66 @@ class SummaryList extends StatelessWidget {
             children: items.isNotEmpty
                 ? items
                     .map(
-                      (e) => ListTile(
-                          title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      (e) => Dismissible(
+                          confirmDismiss: (direction) {
+                            if (direction == DismissDirection.startToEnd) {
+                              return onDelete!(e);
+                            } else if (direction ==
+                                DismissDirection.endToStart) {
+                              return onStop!(e);
+                            }
+                            return Future.value(false);
+                          },
+                          direction: (onDelete != null && onStop != null)
+                              ? DismissDirection.horizontal
+                              : onDelete != null
+                                  ? DismissDirection.startToEnd
+                                  : onStop != null
+                                      ? DismissDirection.endToStart
+                                      : DismissDirection.none,
+                          background: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                            Text(e.description),
-                            Text(currencyFormatter.format(e.amount))
-                          ])),
+                                if (onDelete != null)
+                                  Expanded(
+                                      child: Container(
+                                    color: Colors.red,
+                                    child: const Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                          padding: EdgeInsets.only(left: 12),
+                                          child: Icon(
+                                              Icons.delete_forever_outlined,
+                                              color: Colors.white)),
+                                    ),
+                                  )),
+                              ]),
+                          secondaryBackground: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (onStop != null)
+                                  Expanded(
+                                      child: Container(
+                                          color: Colors.orange,
+                                          child: const Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Padding(
+                                                padding:
+                                                    EdgeInsets.only(right: 12),
+                                                child: Icon(Icons.edit_calendar,
+                                                    color: Colors.white)),
+                                          )))
+                              ]),
+                          key: ValueKey(e.hashCode),
+                          child: ListTile(
+                              title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                Text(toSummaryTile(e).description),
+                                Text(currencyFormatter
+                                    .format(toSummaryTile(e).amount))
+                              ]))),
                     )
                     .toList()
                 : [

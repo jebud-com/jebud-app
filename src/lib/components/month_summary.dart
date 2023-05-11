@@ -57,8 +57,8 @@ class _MonthSummaryState extends State<MonthSummary> {
                                     child: BudgetText(
                                   orangeBoundary: 500,
                                   nbrFormatter: currencyFormatter,
-                                  budget: detailedBudget.estimateSavingsUpTo(
-                                      DateTime.now()),
+                                  budget: detailedBudget
+                                      .estimateSavingsUpTo(DateTime.now()),
                                   fontSize: 32,
                                 )),
                               ],
@@ -154,31 +154,185 @@ class _MonthSummaryState extends State<MonthSummary> {
                         ),
                       ),
                       const SizedBox.square(dimension: 16),
-                      SummaryList(
-                          currencyFormatter: compactCurrencyFormatter,
-                          title:
-                              "💷 Daily expenses of ${DateFormat.yMMMMd("en-us").format(DateTime.now())}",
-                          items: state
-                              .getDailyExpensesForDay(DateTime.now())
-                              .map((e) => SummaryItem(
-                                  description: e.description, amount: e.amount))
-                              .toList()),
+                      SummaryList<DailyExpense>(
+                        currencyFormatter: compactCurrencyFormatter,
+                        title:
+                            "💷 Daily expenses of ${DateFormat.yMMMMd("en-us").format(DateTime.now())}",
+                        onDelete: (dailyExpense) async {
+                          return await showDialog(
+                                  context: context,
+                                  builder: (context) => deleteDialog(
+                                      "Are you sure you want to delete the daily expense ${dailyExpense.description} of ${compactCurrencyFormatter.format(dailyExpense.amount)}",
+                                      () => BlocProvider.of<BudgetManagerBloc>(
+                                              context)
+                                          .add(
+                                              DeleteDailyExpense(dailyExpense)),
+                                      (previous, current) =>
+                                          previous.isDeletingDailyExpense &&
+                                          !current.isDeletingDailyExpense)) ??
+                              false;
+                        },
+                        items: state.getDailyExpensesForDay(DateTime.now()),
+                        toSummaryTile: (e) => SummaryItem(
+                            description: e.description, amount: e.amount),
+                      ),
                       const SizedBox.square(dimension: 16),
-                      SummaryList(
+                      SummaryList<PeriodIncome>(
                           currencyFormatter: compactCurrencyFormatter,
+                          onDelete: (periodIncome) async {
+                            return await showDialog(
+                                    context: context,
+                                    builder: (context) => deleteDialog(
+                                        "Are you sure you want to delete the  periodic income ${periodIncome.description} of ${compactCurrencyFormatter.format(periodIncome.amount)}",
+                                        () => BlocProvider.of<
+                                                BudgetManagerBloc>(context)
+                                            .add(PermanentlyDeletePeriodIncome(
+                                                periodIncome)),
+                                        (previous, current) =>
+                                            previous
+                                                .isPermanentlyDeletingPeriodIncome &&
+                                            !current
+                                                .isPermanentlyDeletingPeriodIncome)) ??
+                                false;
+                          },
+                          onStop: (periodIncome) async {
+                            return await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      DateTime selectedDateTime =
+                                          DateTime.now();
+                                      return BlocListener(
+                                          bloc: BlocProvider.of<
+                                              BudgetManagerBloc>(context),
+                                          listener: (context, state) {
+                                            Navigator.pop(context, false);
+                                          },
+                                          listenWhen: (previous, current) =>
+                                              previous is DetailedBudget &&
+                                              current is DetailedBudget &&
+                                              previous.isStoppingPeriodIncome &&
+                                              !current.isStoppingPeriodIncome,
+                                          child: AlertDialog(
+                                            title: const Text(
+                                                "When Do You want to stop?"),
+                                            content: SizedBox(
+                                                width: 300,
+                                                height: 300,
+                                                child: CalendarDatePicker(
+                                                    initialDate: DateTime.now(),
+                                                    firstDate: periodIncome
+                                                        .startingFrom,
+                                                    lastDate: DateTime(
+                                                        275760, 09, 13),
+                                                    onDateChanged:
+                                                        (newDateTime) {
+                                                      selectedDateTime =
+                                                          newDateTime;
+                                                    })),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(
+                                                        context, false);
+                                                  },
+                                                  child: const Text("Cancel")),
+                                              TextButton(
+                                                  onPressed: () {
+                                                    BlocProvider.of<
+                                                                BudgetManagerBloc>(
+                                                            context)
+                                                        .add(StopPeriodIncome(
+                                                            periodIncome,
+                                                            at: selectedDateTime));
+                                                  },
+                                                  child: const Text("Done!"))
+                                            ],
+                                          ));
+                                    }) ??
+                                false;
+                          },
                           title: "📈 Monthly Incomes",
-                          items: state.incomes
-                              .map((e) => SummaryItem(
-                                  description: e.description, amount: e.amount))
-                              .toList()),
+                          items: state.getActivePeriodIncomeFor(DateTime.now()),
+                          toSummaryTile: (e) => SummaryItem(
+                              description: e.description, amount: e.amount)),
                       const SizedBox.square(dimension: 16),
-                      SummaryList(
-                          currencyFormatter: compactCurrencyFormatter,
-                          title: "📉 Monthly Expenses",
-                          items: state.expenses
-                              .map((e) => SummaryItem(
-                                  description: e.description, amount: e.amount))
-                              .toList()),
+                      SummaryList<PeriodExpense>(
+                        currencyFormatter: compactCurrencyFormatter,
+                        title: "📉 Monthly Expenses",
+                        onDelete: (periodExpense) async {
+                          return await showDialog(
+                                  context: context,
+                                  builder: (context) => deleteDialog(
+                                      "Are you sure you want to delete the periodic expense ${periodExpense.description} of ${compactCurrencyFormatter.format(periodExpense.amount)}",
+                                      () => BlocProvider.of<BudgetManagerBloc>(
+                                              context)
+                                          .add(PermanentlyDeletePeriodExpense(
+                                              periodExpense)),
+                                      (previous, current) =>
+                                          previous
+                                              .isPermanentlyDeletingPeriodExpense &&
+                                          !current
+                                              .isPermanentlyDeletingPeriodExpense)) ??
+                              false;
+                        },
+                        onStop: (periodExpense) async {
+                          return await showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    DateTime selectedDateTime = DateTime.now();
+                                    return BlocListener(
+                                        bloc:
+                                            BlocProvider.of<BudgetManagerBloc>(
+                                                context),
+                                        listener: (context, state) {
+                                          Navigator.pop(context, false);
+                                        },
+                                        listenWhen: (previous, current) =>
+                                            previous is DetailedBudget &&
+                                            current is DetailedBudget &&
+                                            previous.isStoppingPeriodExpense &&
+                                            !current.isStoppingPeriodExpense,
+                                        child: AlertDialog(
+                                          title: const Text(
+                                              "When Do You want to stop?"),
+                                          content: SizedBox(
+                                              width: 300,
+                                              height: 300,
+                                              child: CalendarDatePicker(
+                                                  initialDate: DateTime.now(),
+                                                  firstDate: periodExpense
+                                                      .startingFrom,
+                                                  lastDate:
+                                                      DateTime(275760, 09, 13),
+                                                  onDateChanged: (newDateTime) {
+                                                    selectedDateTime =
+                                                        newDateTime;
+                                                  })),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context, false);
+                                                },
+                                                child: const Text("Cancel")),
+                                            TextButton(
+                                                onPressed: () {
+                                                  BlocProvider.of<
+                                                              BudgetManagerBloc>(
+                                                          context)
+                                                      .add(StopPeriodExpense(
+                                                          periodExpense,
+                                                          at: selectedDateTime));
+                                                },
+                                                child: const Text("Done!"))
+                                          ],
+                                        ));
+                                  }) ??
+                              false;
+                        },
+                        items: state.getActivePeriodExpenseFor(DateTime.now()),
+                        toSummaryTile: (e) => SummaryItem(
+                            description: e.description, amount: e.amount),
+                      ),
                       const SizedBox.square(dimension: 16),
                       Card(
                         clipBehavior: Clip.antiAlias,
@@ -248,5 +402,40 @@ class _MonthSummaryState extends State<MonthSummary> {
                     ],
                   )));
         });
+  }
+
+  Widget deleteDialog(
+      String content,
+      VoidCallback delete,
+      bool Function(DetailedBudget previous, DetailedBudget current)
+          dismissWhen) {
+    return BlocListener(
+        bloc: BlocProvider.of<BudgetManagerBloc>(context),
+        listenWhen: (previous, current) {
+          return previous is DetailedBudget &&
+              current is DetailedBudget &&
+              dismissWhen(previous, current);
+        },
+        listener: (context, state) {
+          if (state is DetailedBudget && !state.isDeletingDailyExpense) {
+            Navigator.pop(context, true);
+          }
+        },
+        child: AlertDialog(
+          title: const Text("Do you confirm?"),
+          content: Text(content),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  delete();
+                },
+                child: const Text("Sure!")),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                child: const Text("Nope")),
+          ],
+        ));
   }
 }
