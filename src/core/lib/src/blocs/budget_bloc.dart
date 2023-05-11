@@ -354,20 +354,8 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
       final currentMonth =
           DateTime(startMonth.year, startMonth.month + i, startMonth.day);
       result = result +
-          incomes
-              .where((income) =>
-                  (income.startingFrom
-                          .getFirstOfMonthAtMidnight()
-                          .isBefore(currentMonth) &&
-                      income.applyUntil.isAfter(currentMonth)) ||
-                  income.startingFrom
-                      .getFirstOfMonthAtMidnight()
-                      .isAtSameMomentAs(currentMonth) ||
-                  income.applyUntil
-                      .getFirstOfMonthAtMidnight()
-                      .isAtSameMomentAs(currentMonth))
-              .fold(0.0,
-                  (previousValue, element) => previousValue + element.amount);
+          getActivePeriodIncomeFor(currentMonth).fold(
+              0.0, (previousValue, element) => previousValue + element.amount);
       result = result - _expensesFor(currentMonth);
     }
 
@@ -392,16 +380,8 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
   }
 
   double _expensesFor(DateTime month) {
-    month = month.getFirstOfMonthAtMidnight();
-    return expenses.fold(0.0, (value, element) {
-      var applyUntil = element.applyUntil.getFirstOfMonthAtMidnight();
-      var startingFrom = element.startingFrom.getFirstOfMonthAtMidnight();
-      if (applyUntil.isAtSameMomentAs(month) ||
-          startingFrom.isAtSameMomentAs(month) ||
-          applyUntil.isAfter(month) && startingFrom.isBefore(month)) {
-        return value + element.amount;
-      }
-      return value;
+    return getActivePeriodExpenseFor(month).fold(0.0, (value, element) {
+      return value + element.amount;
     });
   }
 
@@ -562,6 +542,34 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
             element.day.month == day.month &&
             element.day.year == day.year)
         .toList();
+  }
+
+  List<PeriodIncome> getActivePeriodIncomeFor(DateTime dateTime) {
+    final targetMonth = dateTime.getFirstOfMonthAtMidnight();
+    return incomes
+        .where((income) =>
+            (income.startingFrom
+                    .getFirstOfMonthAtMidnight()
+                    .isBefore(dateTime) &&
+                income.applyUntil.isAfter(targetMonth)) ||
+            income.startingFrom
+                .getFirstOfMonthAtMidnight()
+                .isAtSameMomentAs(targetMonth) ||
+            income.applyUntil
+                .getFirstOfMonthAtMidnight()
+                .isAtSameMomentAs(targetMonth))
+        .toList();
+  }
+
+  List<PeriodExpense> getActivePeriodExpenseFor(DateTime dateTime) {
+    final month = dateTime.getFirstOfMonthAtMidnight();
+    return expenses.where((element) {
+      var applyUntil = element.applyUntil.getFirstOfMonthAtMidnight();
+      var startingFrom = element.startingFrom.getFirstOfMonthAtMidnight();
+      return applyUntil.isAtSameMomentAs(month) ||
+          startingFrom.isAtSameMomentAs(month) ||
+          applyUntil.isAfter(month) && startingFrom.isBefore(month);
+    }).toList();
   }
 }
 
