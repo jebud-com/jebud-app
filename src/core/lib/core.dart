@@ -13,7 +13,13 @@ export './src/blocs/budget_bloc.dart'
         AddDailyExpenseAllocation,
         UpdateDailyExpenseAllocation,
         AddDailyExpense,
-        InitializeBudget;
+        InitializeBudget,
+        DeleteDailyExpense,
+        PermanentlyDeletePeriodExpense,
+        PermanentlyDeletePeriodIncome,
+        StopPeriodIncome,
+        StopPeriodExpense;
+
 export 'src/entities/daily_expense.dart' show DailyExpense;
 export 'src/entities/daily_expense_period_allocation.dart'
     show DailyExpensePeriodAllocation;
