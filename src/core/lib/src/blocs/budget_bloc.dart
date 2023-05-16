@@ -404,7 +404,7 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
 
   int _numberOfMonthsBetweenOneExclusiveEnd(
       DateTime startMonth, DateTime endMonth) {
-    final startingMonth = budgetDetails.startingMonth;
+    final startingMonth = startMonth;
     final firstDayOfTargetMonth = DateTime(endMonth.year, endMonth.month, 1);
 
     final yearDifference = firstDayOfTargetMonth.year - startingMonth.year;
@@ -570,6 +570,43 @@ class DetailedBudget extends Equatable implements BudgetManagerBlocState {
           startingFrom.isAtSameMomentAs(month) ||
           applyUntil.isAfter(month) && startingFrom.isBefore(month);
     }).toList();
+  }
+
+  double projectBudget({required DateTime from, required DateTime to}) {
+    from = from.getFirstOfMonthAtMidnight();
+    final startMonth = budgetDetails.startingMonth;
+    var result = budgetDetails.startingAmount;
+    for (int i = 0; i < _numberOfMonthsToTargetMonth(to); i++) {
+      final currentMonth =
+          DateTime(startMonth.year, startMonth.month + i, startMonth.day);
+      result += getActivePeriodIncomeFor(currentMonth).fold(
+          0.0, (previousValue, element) => previousValue + element.amount);
+      result -= _expensesFor(currentMonth);
+    }
+
+    final allEarlierExpenses = dailyExpenses
+        .where((element) =>
+            element.day.month < from.month && element.day.year == from.year ||
+            element.day.year < from.year)
+        .fold(0.0, (value, element) => value + element.amount);
+
+    final numberOfMonths = _numberOfMonthsBetweenOneExclusiveEnd(from, to);
+    
+    final expensesOfFutureMonths = dailyExpenseAllocation.amount * numberOfMonths; 
+        
+
+    final maxBetweenExpectedAndActualDailyExpenseOfRunningMonth = max(
+        dailyExpenseAllocation.amount,
+        dailyExpenses
+            .where((element) =>
+                element.day.month == from.month &&
+                element.day.year == from.year)
+            .fold(0.0, (value, element) => value + element.amount));
+
+    return result -
+        allEarlierExpenses -
+        expensesOfFutureMonths -
+        maxBetweenExpectedAndActualDailyExpenseOfRunningMonth;
   }
 }
 
