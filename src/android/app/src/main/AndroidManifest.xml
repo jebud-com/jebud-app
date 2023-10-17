@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="jebud.jebud_app">
    <application
-        android:label="jebud_app"
+        android:label="Jebud"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

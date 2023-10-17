@@ -1,0 +1,11 @@
+include: package:lints/recommended.yaml
+
+
+linter:
+  rules:
+    - unawaited_futures
+    - camel_case_types
+
+analyzer:
+  errors:
+    unawaited_futures: error
